@@ -1,15 +1,15 @@
 # Stage 1: build the SvelteKit static output
-FROM node:22-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
 # Install dependencies (cached layer, deterministic via lockfile)
-COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
 # Build the static site
 COPY . ./
-RUN npm run build
+RUN bun run build
 
 # Stage 2: serve the build with the non-root nginx variant on port 8080
 FROM nginxinc/nginx-unprivileged:1.27-alpine
