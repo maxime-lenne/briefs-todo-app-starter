@@ -1,0 +1,19 @@
+{
+  "name": "briefs-todo-app-starter",
+  "version": "0.1.0",
+  "description": "To-Do application with FastAPI, SvelteKit, and Tailwind CSS v4",
+  "type": "module",
+  "author": "Maxime Lenne",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=22.11.0"
+  },
+  "packageManager": "bun@1.1.45",
+  "scripts": {
+
+  },
+  "devDependencies": {
+
+  }
+}

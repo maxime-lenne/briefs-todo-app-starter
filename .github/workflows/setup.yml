@@ -1,0 +1,80 @@
+name: Repository Setup
+
+# Requires a secret named ADMIN_TOKEN with a PAT (fine-grained or classic)
+# with repository Administration (read & write) permissions.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  setup:
+    name: Apply Repository Settings
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Create develop branch if missing
+        run: |
+          DEFAULT_SHA=$(gh api repos/${{ github.repository }}/git/refs/heads/main --jq '.object.sha')
+          gh api repos/${{ github.repository }}/git/refs \
+            --method POST \
+            --field ref="refs/heads/develop" \
+            --field sha="$DEFAULT_SHA" \
+            2>/dev/null || echo "develop branch already exists"
+
+      - name: Set default branch to develop
+        run: |
+          gh api repos/${{ github.repository }} \
+            --method PATCH \
+            --field default_branch=develop
+
+      - name: Configure merge settings (rebase only)
+        run: |
+          gh api repos/${{ github.repository }} \
+            --method PATCH \
+            --field allow_squash_merge=false \
+            --field allow_merge_commit=false \
+            --field allow_rebase_merge=true \
+            --field delete_branch_on_merge=true
+
+      - name: Protect develop branch (staging)
+        run: |
+          gh api repos/${{ github.repository }}/branches/develop/protection \
+            --method PUT \
+            --header "Accept: application/vnd.github+json" \
+            --field required_linear_history=true \
+            --field allow_force_pushes=false \
+            --field allow_deletions=false \
+            --field enforce_admins=false \
+            --field 'required_pull_request_reviews[required_approving_review_count]=0' \
+            --field 'required_pull_request_reviews[dismiss_stale_reviews]=true' \
+            --field 'required_status_checks[strict]=true' \
+            --field 'required_status_checks[contexts][]=Markdown Lint' \
+            --field 'required_status_checks[contexts][]=YAML Lint' \
+            --field 'required_status_checks[contexts][]=Commit Lint' \
+            --field 'restrictions=null' \
+          || echo "::warning::Branch protection skipped for 'develop' — requires GitHub Pro (private repo) or a public repository."
+
+      - name: Protect main branch (production)
+        run: |
+          gh api repos/${{ github.repository }}/branches/main/protection \
+            --method PUT \
+            --header "Accept: application/vnd.github+json" \
+            --field required_linear_history=true \
+            --field allow_force_pushes=false \
+            --field allow_deletions=false \
+            --field enforce_admins=false \
+            --field 'required_pull_request_reviews[required_approving_review_count]=1' \
+            --field 'required_pull_request_reviews[dismiss_stale_reviews]=true' \
+            --field 'required_status_checks[strict]=true' \
+            --field 'required_status_checks[contexts][]=Markdown Lint' \
+            --field 'required_status_checks[contexts][]=YAML Lint' \
+            --field 'required_status_checks[contexts][]=Commit Lint' \
+            --field 'restrictions=null' \
+          || echo "::warning::Branch protection skipped for 'main' — requires GitHub Pro (private repo) or a public repository."

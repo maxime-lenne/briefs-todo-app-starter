@@ -1,0 +1,14 @@
+# CODEOWNERS - Automatically request reviews from specific people/teams
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything (unless overridden below)
+* @maxime-lenne
+
+# Protect settings file (requires admin approval)
+/.github/settings.yml @maxime-lenne
+
+# Examples of path-specific ownership:
+# /docs/ @docs-team
+# /src/api/ @backend-team
+# /src/ui/ @frontend-team
+# *.js @js-experts
