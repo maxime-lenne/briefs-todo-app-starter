@@ -1,0 +1,234 @@
+# AI Agents Guide
+
+Complete guide for AI assistants working on this repository.
+
+## Documentation Index
+
+| File | Purpose | Description |
+|------|---------|-------------|
+| [`AGENTS.md`](./AGENTS.md) | AI Guide | This file - conventions and rules for AI agents |
+| [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) | Architecture | Directory and file organization |
+| [`CONVENTIONS.md`](./CONVENTIONS.md) | Code style | Naming conventions, code style, git |
+| [`TECHNICAL_GUIDE.md`](./TECHNICAL_GUIDE.md) | Implementation | API, database, frontend, CI/CD |
+| [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) | UI/UX | Tailwind tokens and component styling |
+| [`COMPONENT_REFERENCE.md`](./COMPONENT_REFERENCE.md) | Components | API endpoints and Svelte components |
+| [`FEATURES.md`](./FEATURES.md) | Features | Epics, user stories, feature status |
+| [`SCREEN_FLOW.md`](./SCREEN_FLOW.md) | Navigation | Web app screen flows |
+| [`TASKS.md`](./TASKS.md) | Tasks | Task tracking and backlog |
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| API Framework | FastAPI |
+| ASGI Server | Uvicorn |
+| Database | SQLite (Postgres compatible via `DATABASE_URL`) |
+| ORM | SQLAlchemy 2.0 |
+| Validation | Pydantic v2 |
+| Frontend Framework | SvelteKit 2 (Svelte 5 runes) |
+| Styling | Tailwind CSS v4 |
+| Bundler | Vite |
+| Language (frontend) | TypeScript |
+| Python Version | >= 3.10 |
+| Node Version | >= 20 |
+| Package Manager | Bun (lint tooling), npm (frontend) |
+| Git Hooks | Husky + lint-staged |
+| Commit Convention | Gitmoji |
+| Commit Validation | commitlint |
+| Linting | markdownlint, yamllint, Ruff (Python) |
+| Dependency Updates | Renovate, Dependabot |
+| CI/CD | GitHub Actions |
+
+### Available Commands
+
+```bash
+# Repo-level lint tooling (root)
+bun install           # Install lint dependencies
+bun run lint          # Lint markdown and yaml
+bun run lint:md       # Lint markdown only
+bun run lint:md:fix   # Auto-fix markdown
+bun run lint:yaml     # Lint yaml files
+bun run lint:commit   # Validate last commit message
+bun run commit        # Interactive gitmoji commit
+
+# API (from api/)
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload          # http://localhost:8000
+
+# Frontend (from web/)
+npm install
+npm run dev                        # http://localhost:5173
+npm run check                      # svelte-check + tsc
+npm run build                      # Production build
+npm run preview                    # Preview the production build
+```
+
+---
+
+## File Summaries
+
+### PROJECT_STRUCTURE.md
+
+Project structure with two top-level applications. Key points:
+
+- `api/`: FastAPI application (models, schemas, CRUD, database)
+- `web/`: SvelteKit + Tailwind v4 frontend (routes, components, fetch client)
+- `docs/`: All documentation files
+
+### CONVENTIONS.md
+
+Development conventions. Key points:
+
+- **Python**: PEP 8, type hints, snake_case functions and variables
+- **TypeScript / Svelte**: Svelte 5 runes (`$state`, `$derived`, `$props`), camelCase
+- **Files**: kebab-case for config, snake_case for Python modules, PascalCase for Svelte components
+- **Git branches**: feature/fix/refactor/docs from main
+- **Commits**: Gitmoji convention (emoji + description)
+
+### TECHNICAL_GUIDE.md
+
+Technical implementation guide. Key points:
+
+- **API**: FastAPI endpoints, SQLAlchemy models, Pydantic schemas
+- **Database**: SQLite by default, Postgres via `DATABASE_URL`
+- **Frontend**: SvelteKit routes, typed fetch client, Vite proxy `/api`
+- **CI/CD**: GitHub Actions workflows (lint on push/PR)
+
+### DESIGN_SYSTEM.md
+
+UI/UX design with Tailwind v4. Key points:
+
+- **Tokens**: Color palette, spacing, typography
+- **Layout**: Single-column, max-width container, sticky header optional
+- **Components**: Buttons, inputs, list items styled with utility classes
+
+### COMPONENT_REFERENCE.md
+
+API and UI component documentation. Key points:
+
+- **API endpoints**: Full CRUD reference for `/todos`
+- **Pydantic schemas**: Request/Response models
+- **SQLAlchemy models**: Database entity definitions
+- **Svelte components**: `+page.svelte`, `TodoItem.svelte`, typed `api.ts`
+
+### FEATURES.md
+
+Feature management. Key points:
+
+- Organization by epics (DB, API, Web frontend, tooling)
+- User stories for each epic
+- Statuses: Done, In Progress, Planned
+
+### SCREEN_FLOW.md
+
+Web app navigation and user flows. Key points:
+
+- Single page with task list, add form, filters, inline edit
+- CRUD flows: add, toggle, edit, delete, filter
+
+### TASKS.md
+
+Project tracking. Key points:
+
+- API implementation
+- SvelteKit + Tailwind frontend
+- Tooling and CI/CD
+
+---
+
+## AI Agent Specific Rules
+
+### Language Rule
+
+**All written content must be in English**, regardless of the user's prompt language:
+
+- Documentation (markdown files, comments)
+- Commit messages
+- Tasks and subtasks
+- Epics and user stories
+- Code comments and docstrings
+- Variable and function names
+- Error messages and logs
+
+### Commit Convention
+
+This project accepts **Gitmoji** or **Conventional Commits**:
+
+```bash
+bun run commit  # Interactive gitmoji tool
+```
+
+**Gitmoji format:** `<emoji> <description>`
+
+| Emoji | Description |
+|-------|-------------|
+| ✨ | New feature |
+| 🐛 | Bug fix |
+| 📝 | Documentation |
+| ♻️ | Refactor |
+| 🔧 | Configuration |
+| 💄 | UI / styling |
+| 🔒️ | Security fix |
+
+**Conventional format:** `<type>(scope): <description>`
+
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+
+Full gitmoji list: [gitmoji.dev](https://gitmoji.dev)
+
+### Fundamental Principles
+
+1. **Read before modifying** - Always read a file before proposing changes
+2. **Consult documentation** - Check relevant docs/ files before any task
+3. **Respect existing patterns** - Follow the style and conventions already in place
+4. **Minimize changes** - Only modify what is necessary
+5. **Document changes** - Update docs if behavior changes
+6. **Run checks** - `npm run check` (frontend) and lint before committing
+
+### Code Generation Preferences
+
+| Language | Preferences |
+|----------|-------------|
+| **Python** | PEP 8, type hints, Pydantic models |
+| **TypeScript** | Strict mode, explicit types at module boundaries |
+| **Svelte** | Svelte 5 runes (`$state`, `$derived`, `$effect`, `$props`) — no legacy reactive `$:` |
+| **Tailwind** | Utility classes inline, prefer composition over @apply |
+| **YAML** | Follow yamllint rules, consistent indentation |
+| **Markdown** | Follow markdownlint rules, no trailing spaces |
+| **SQL** | Uppercase keywords, snake_case tables/columns |
+
+### Pre-commit Checklist
+
+- [ ] Code passes `bun run lint`
+- [ ] Frontend type-checks: `cd web && npm run check`
+- [ ] Frontend builds: `cd web && npm run build`
+- [ ] API endpoints respond: `curl http://localhost:8000/todos`
+- [ ] Documentation updated if necessary
+- [ ] Commit uses gitmoji convention
+- [ ] No secrets or `.env` files committed
+
+### Behaviors to Avoid
+
+- Do not create unnecessary files
+- Do not add dependencies without justification
+- Do not modify project structure without discussion
+- Do not ignore linting errors
+- Do not comment out dead code, delete it
+- Do not hardcode secrets or database credentials
+- Do not bypass the Vite `/api` proxy with hardcoded `localhost:8000` URLs in components
+- Do not mix Svelte 5 runes with legacy `$:` reactive syntax in the same file
+
+### Priorities
+
+1. **Functionality** - Code must work end-to-end (API + frontend)
+2. **Type safety** - TypeScript strict, Pydantic schemas at boundaries
+3. **Readability** - Code must be understandable
+4. **Consistency** - Follow existing patterns
+5. **Simplicity** - Avoid over-engineering
+
+---
+
+*Last updated: 2026-04-29*

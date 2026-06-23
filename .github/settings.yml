@@ -10,7 +10,7 @@ repository:
   homepage: https://maxime-lenne.fr
 
   # Visibility
-  private: true
+  private: false
 
   # Features
   has_issues: true
