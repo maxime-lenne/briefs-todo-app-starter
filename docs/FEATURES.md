@@ -59,7 +59,7 @@ Each item is linked to a GitHub issue for tracking and status.
 |------------|----------|
 | As a developer, I want `bun run lint` to validate markdown and yaml on commit | High |
 | As a developer, I want commitlint + gitmoji to enforce a consistent commit style | High |
-| As a developer, I want `npm run check` to type-check the SvelteKit app | High |
+| As a developer, I want `bun run check` to type-check the SvelteKit app | High |
 | As a developer, I want CI to lint on every push and PR to `main`/`develop` | Medium |
 | As a developer, I want Renovate / Dependabot to keep dependencies up to date | Medium |
 

@@ -16,8 +16,8 @@ Detailed guide for technical implementation aspects.
 | Bundler | Vite | ^6.0 |
 | Language (frontend) | TypeScript | ^5.7 |
 | Python | CPython | >= 3.10 |
-| Node | Node.js | >= 20 |
-| Package Manager | Bun (root tooling) / npm (web/) | >= 1.1 / >= 10 |
+| Package Manager (JS) | Bun | >= 1.3 |
+| Package Manager (Python) | uv | >= 0.5 |
 | Git Hooks | Husky | ^9.1 |
 | Commit Lint | commitlint | ^20.4 |
 | Markdown Lint | markdownlint-cli | ^0.48 |
@@ -283,14 +283,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: pip install yamllint
-      - run: yamllint .
+      - run: uvx yamllint .
 ```
 
 ### Future Workflows
 
-- **Frontend type-check** - `npm run check` on PR
-- **Frontend build** - `npm run build` on PR
+- **Frontend type-check** - `bun run check` on PR
+- **Frontend build** - `bun run build` on PR
 - **Python lint** - Ruff on PR
 - **Integration tests** - End-to-end via Playwright
 
@@ -334,12 +333,12 @@ git checkout -b feature/description
 
 # API
 cd api
-source .venv/bin/activate  # or create one with `python -m venv .venv`
-uvicorn main:app --reload
+uv sync                            # creates .venv and installs dependencies
+uv run uvicorn main:app --reload
 
 # Frontend (in another terminal)
 cd web
-npm run dev
+bun run dev
 
 # Lint and commit
 bun run lint
@@ -350,8 +349,8 @@ git push origin feature/description
 ### Pre-commit Checklist
 
 - [ ] `bun run lint` passes
-- [ ] `cd web && npm run check` passes
-- [ ] `cd web && npm run build` succeeds
+- [ ] `cd web && bun run check` passes
+- [ ] `cd web && bun run build` succeeds
 - [ ] API endpoints respond correctly (`curl http://localhost:8000/todos`)
 - [ ] Web UI loads and functions at <http://localhost:5173>
 - [ ] Documentation updated if needed

@@ -60,7 +60,7 @@ Project task tracking based on the project brief.
 - [x] Define CPU and memory limits for PostgreSQL in Compose
 - [x] Define CPU and memory limits for API in Compose
 - [x] Define CPU and memory limits for the web in Compose
-- [x] Optimize Docker images (slim base, `--no-cache-dir` pip, `npm ci --no-audit --no-fund`,
+- [x] Optimize Docker images (slim base, `uv sync --frozen --no-dev`, `bun install --frozen-lockfile`,
       multi-stage build)
 
 ### Orchestration Security

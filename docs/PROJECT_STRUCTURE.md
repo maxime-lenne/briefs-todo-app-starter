@@ -10,7 +10,8 @@ todo-app/
 │   ├── models.py                       # SQLAlchemy ORM models
 │   ├── schemas.py                      # Pydantic validation schemas
 │   ├── crud.py                         # CRUD operations
-│   └── requirements.txt                # Python dependencies (API)
+│   ├── pyproject.toml                  # Python project metadata and dependencies
+│   └── uv.lock                         # Locked dependency versions (uv)
 ├── web/                                # SvelteKit + Tailwind v4 frontend
 │   ├── src/
 │   │   ├── app.html                    # HTML shell
@@ -86,7 +87,8 @@ todo-app/
 | `models.py` | SQLAlchemy ORM models (`Todo` table) |
 | `schemas.py` | Pydantic models for request/response validation |
 | `crud.py` | Database CRUD operations (create, read, update, delete) |
-| `requirements.txt` | Python package dependencies for the API |
+| `pyproject.toml` | Python project metadata and dependencies |
+| `uv.lock` | Locked dependency versions managed by uv |
 
 ### Web (`web/`)
 

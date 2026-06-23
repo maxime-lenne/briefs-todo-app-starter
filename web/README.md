@@ -5,8 +5,8 @@ SvelteKit + Tailwind CSS v4 frontend for the To-Do API.
 ## Develop
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 The dev server runs on <http://localhost:5173>. Vite proxies `/api/*` to
@@ -16,14 +16,14 @@ must be running on that port.
 ## Build
 
 ```bash
-npm run build
-npm run preview
+bun run build
+bun run preview
 ```
 
 ## Type-check
 
 ```bash
-npm run check
+bun run check
 ```
 
 ## Stack

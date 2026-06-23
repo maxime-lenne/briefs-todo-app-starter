@@ -33,7 +33,8 @@ Complete guide for AI assistants working on this repository.
 | Language (frontend) | TypeScript |
 | Python Version | >= 3.10 |
 | Node Version | >= 20 |
-| Package Manager | Bun (lint tooling), npm (frontend) |
+| Package Manager (JS) | Bun |
+| Package Manager (Python) | uv |
 | Git Hooks | Husky + lint-staged |
 | Commit Convention | Gitmoji |
 | Commit Validation | commitlint |
@@ -54,16 +55,15 @@ bun run lint:commit   # Validate last commit message
 bun run commit        # Interactive gitmoji commit
 
 # API (from api/)
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --reload          # http://localhost:8000
+uv sync                            # creates .venv and installs dependencies
+uv run uvicorn main:app --reload   # http://localhost:8000
 
 # Frontend (from web/)
-npm install
-npm run dev                        # http://localhost:5173
-npm run check                      # svelte-check + tsc
-npm run build                      # Production build
-npm run preview                    # Preview the production build
+bun install
+bun run dev                        # http://localhost:5173
+bun run check                      # svelte-check + tsc
+bun run build                      # Production build
+bun run preview                    # Preview the production build
 ```
 
 ---
@@ -186,7 +186,7 @@ Full gitmoji list: [gitmoji.dev](https://gitmoji.dev)
 3. **Respect existing patterns** - Follow the style and conventions already in place
 4. **Minimize changes** - Only modify what is necessary
 5. **Document changes** - Update docs if behavior changes
-6. **Run checks** - `npm run check` (frontend) and lint before committing
+6. **Run checks** - `bun run check` (frontend) and lint before committing
 
 ### Code Generation Preferences
 
@@ -203,8 +203,8 @@ Full gitmoji list: [gitmoji.dev](https://gitmoji.dev)
 ### Pre-commit Checklist
 
 - [ ] Code passes `bun run lint`
-- [ ] Frontend type-checks: `cd web && npm run check`
-- [ ] Frontend builds: `cd web && npm run build`
+- [ ] Frontend type-checks: `cd web && bun run check`
+- [ ] Frontend builds: `cd web && bun run build`
 - [ ] API endpoints respond: `curl http://localhost:8000/todos`
 - [ ] Documentation updated if necessary
 - [ ] Commit uses gitmoji convention

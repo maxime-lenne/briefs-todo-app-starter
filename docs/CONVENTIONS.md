@@ -88,7 +88,7 @@ class TodoCreate(BaseModel):
 - Copy dependency files before application code (layer caching)
 - Create and use non-root users
 - Use `.dockerignore` to exclude unnecessary files
-- Clean pip cache: `pip install --no-cache-dir`
+- Use `uv sync --frozen --no-dev` in production Dockerfiles (uv manages the cache automatically)
 
 ### Docker Compose
 
