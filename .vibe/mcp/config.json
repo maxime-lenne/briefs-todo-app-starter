@@ -1,0 +1,128 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/spec/main/schema/config.json",
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${{ env.GITHUB_TOKEN }}",
+        "REPOSITORY": "briefs-todo-app-starter"
+      },
+      "disabled": false
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem"],
+      "env": {
+        "MCP_MODELS_DIRECTORY": "./.vibe/mcp/models",
+        "ALLOWED_DIRECTORIES": "./api,./web,./docs,./.github,./docker-compose.yml,./Dockerfile.*,./.vibe",
+        "DENIED_DIRECTORIES": "./.venv,./web/node_modules,./.git",
+        "READ_ONLY": false
+      },
+      "disabled": false
+    },
+    "process": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-process"],
+      "env": {
+        "TIMEOUT": "30000",
+        "WORKING_DIRECTORY": "."
+      },
+      "disabled": false
+    },
+    "git": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-git"],
+      "env": {
+        "REPOSITORY_PATH": "."
+      },
+      "disabled": false
+    },
+    "docker": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/mcp-server-docker"],
+      "env": {
+        "DOCKER_HOST": "unix:///var/run/docker.sock"
+      },
+      "disabled": false
+    },
+    "http": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-http"],
+      "env": {
+        "TIMEOUT": "10000",
+        "BASE_URL": "http://localhost:8000"
+      },
+      "disabled": false
+    },
+    "openapi": {
+      "command": "npx",
+      "args": ["mcp-openapi"],
+      "env": {
+        "SPEC_URL": "http://localhost:8000/openapi.json",
+        "BASE_URL": "http://localhost:8000"
+      },
+      "disabled": false
+    }
+  },
+  "skills": {
+    "directories": [".vibe/skills"],
+    "autoLoad": [
+      "todo-app",
+      "fastapi-sqlalchemy",
+      "sveltekit-tailwind",
+      "docker",
+      "testing",
+      "security"
+    ],
+    "disabled": []
+  },
+  "hooks": {
+    "onStart": [
+      {
+        "skill": "todo-app",
+        "action": "load_project_context"
+      }
+    ],
+    "onCommand": [
+      {
+        "patterns": ["docker", "compose", "build", "up", "down"],
+        "skill": "docker",
+        "action": "validate_docker_compose"
+      },
+      {
+        "patterns": ["git", "commit"],
+        "skill": "todo-app",
+        "action": "validate_commit_message"
+      },
+      {
+        "patterns": ["bun", "run", "lint"],
+        "skill": "todo-app",
+        "action": "run_lint_checks"
+      }
+    ],
+    "onFileChange": [
+      {
+        "patterns": ["**/*.py"],
+        "skill": "fastapi-sqlalchemy",
+        "action": "validate_python_code"
+      },
+      {
+        "patterns": ["**/*.svelte", "**/*.ts"],
+        "skill": "sveltekit-tailwind",
+        "action": "validate_typescript_code"
+      }
+    ]
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "output": "stdout"
+  },
+  "features": {
+    "autoComplete": true,
+    "suggestions": true,
+    "contextAwareness": true,
+    "fileWatch": true
+  }
+}

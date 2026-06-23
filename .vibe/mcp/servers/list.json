@@ -1,0 +1,205 @@
+{
+  "mcpServers": [
+    {
+      "name": "github",
+      "description": "GitHub API integration for repository management",
+      "type": "official",
+      "url": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+      "capabilities": [
+        "read_repository",
+        "list_issues",
+        "list_pull_requests",
+        "search_code",
+        "get_file_contents",
+        "create_issue",
+        "create_pull_request",
+        "get_commits",
+        "get_branches"
+      ],
+      "recommended": true,
+      "configuration": {
+        "required": ["GITHUB_TOKEN"],
+        "optional": ["REPOSITORY", "ORGANIZATION"]
+      }
+    },
+    {
+      "name": "filesystem",
+      "description": "Local filesystem access for reading/writing files",
+      "type": "official",
+      "url": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+      "capabilities": [
+        "read_file",
+        "write_file",
+        "list_directory",
+        "search_files",
+        "get_file_info",
+        "read_directory",
+        "delete_file"
+      ],
+      "recommended": true,
+      "configuration": {
+        "required": ["ALLOWED_DIRECTORIES"],
+        "optional": ["DENIED_DIRECTORIES", "READ_ONLY"]
+      }
+    },
+    {
+      "name": "process",
+      "description": "Execute system commands and manage processes",
+      "type": "official",
+      "url": "https://github.com/modelcontextprotocol/servers/tree/main/src/process",
+      "capabilities": [
+        "run_command",
+        "start_process",
+        "list_processes",
+        "kill_process",
+        "get_process_info"
+      ],
+      "recommended": true,
+      "configuration": {
+        "optional": ["TIMEOUT", "WORKING_DIRECTORY"]
+      }
+    },
+    {
+      "name": "git",
+      "description": "Git operations (commits, branches, tags, etc.)",
+      "type": "community",
+      "url": "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+      "capabilities": [
+        "get_status",
+        "get_log",
+        "get_diff",
+        "create_branch",
+        "create_commit",
+        "push",
+        "pull",
+        "list_branches",
+        "list_commits",
+        "checkout_branch"
+      ],
+      "recommended": true,
+      "configuration": {
+        "optional": ["REPOSITORY_PATH"]
+      }
+    },
+    {
+      "name": "docker",
+      "description": "Docker container management",
+      "type": "community",
+      "url": "https://github.com/metadio/mcp-server-docker",
+      "capabilities": [
+        "list_containers",
+        "list_images",
+        "inspect_container",
+        "start_container",
+        "stop_container",
+        "build_image",
+        "run_container",
+        "exec_command",
+        "get_container_logs",
+        "remove_container",
+        "remove_image"
+      ],
+      "recommended": true,
+      "configuration": {
+        "optional": ["DOCKER_HOST", "TLS_VERIFY"]
+      }
+    },
+    {
+      "name": "http",
+      "description": "HTTP requests and API testing",
+      "type": "community",
+      "url": "https://github.com/modelcontextprotocol/servers/tree/main/src/http",
+      "capabilities": [
+        "get",
+        "post",
+        "put",
+        "delete",
+        "patch",
+        "head",
+        "options"
+      ],
+      "recommended": true,
+      "configuration": {
+        "optional": ["TIMEOUT", "HEADERS", "BASE_URL"]
+      }
+    },
+    {
+      "name": "openapi",
+      "description": "OpenAPI/Swagger specification reader and validator",
+      "type": "community",
+      "url": "https://github.com/davidefrance/mcp-openapi",
+      "capabilities": [
+        "read_openapi_spec",
+        "list_endpoints",
+        "get_endpoint_details",
+        "validate_request",
+        "validate_response",
+        "list_schemas",
+        "get_schema_details"
+      ],
+      "recommended": true,
+      "configuration": {
+        "optional": ["SPEC_URL", "SPEC_PATH", "BASE_URL"]
+      }
+    },
+    {
+      "name": "fetch",
+      "description": "Fetch content from URLs (web scraping, API calls)",
+      "type": "official",
+      "url": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+      "capabilities": [
+        "fetch_url",
+        "fetch_html",
+        "fetch_json",
+        "fetch_markdown",
+        "fetch_text"
+      ],
+      "recommended": false,
+      "configuration": {
+        "optional": ["TIMEOUT", "USER_AGENT", "MAX_REDIRECTS"]
+      }
+    },
+    {
+      "name": "sql",
+      "description": "SQL database query execution",
+      "type": "community",
+      "url": "https://github.com/metadio/mcp-server-sql",
+      "capabilities": [
+        "execute_query",
+        "list_tables",
+        "list_databases",
+        "get_table_schema",
+        "describe_table",
+        "list_columns",
+        "get_table_info"
+      ],
+      "recommended": false,
+      "configuration": {
+        "required": ["CONNECTION_STRING"],
+        "optional": ["DIALECT", "SCHEMA"]
+      }
+    },
+    {
+      "name": "redis",
+      "description": "Redis database access",
+      "type": "community",
+      "url": "https://github.com/metadio/mcp-server-redis",
+      "capabilities": [
+        "get",
+        "set",
+        "delete",
+        "exists",
+        "keys",
+        "list_databases",
+        "flush_database",
+        "get_hash",
+        "set_hash"
+      ],
+      "recommended": false,
+      "configuration": {
+        "required": ["REDIS_URL"],
+        "optional": ["REDIS_DB"]
+      }
+    }
+  ]
+}
