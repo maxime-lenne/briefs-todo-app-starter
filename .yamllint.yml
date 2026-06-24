@@ -1,0 +1,50 @@
+extends:
+  - default
+
+rules:
+  braces:
+    max-spaces-inside: 1
+    min-spaces-inside: 0
+    max-spaces-inside-empty: -1
+    min-spaces-inside-empty: -1
+  brackets:
+    max-spaces-inside: 1
+    min-spaces-inside: 0
+    max-spaces-inside-empty: -1
+    min-spaces-inside-empty: -1
+  colons:
+    max-spaces-before: 0
+    max-spaces-after: -1
+  commas:
+    max-spaces-before: 0
+    max-spaces-after: -1
+  comments:
+    require-starting-space: true
+  comments-indentation: false
+  document-end: false
+  document-start: false
+  empty-lines:
+    max: 1
+    max-start: 0
+    max-end: 0
+  hyphens:
+    max-spaces-after: -1
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
+    check-multi-line-strings: false
+  key-ordering: false
+  line-length: false
+  new-line-at-end-of-file: true
+  newlines:
+    max: 2
+  quoted-strings:
+    required: false
+    extra-allowed: [""]
+  trailing-spaces: true
+  truthy:
+    allowed-values: ["true", "false", "yes", "no", "on", "off"]
+
+ignore: |
+  .venv/
+  node_modules/
