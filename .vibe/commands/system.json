@@ -1,0 +1,380 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/spec/main/schema/command.json",
+  "category": "System & Utilities",
+  "description": "System-level commands and utility functions",
+  "dependencies": ["todo-app"],
+  "commands": [
+    {
+      "name": "help",
+      "description": "Show help information and available commands",
+      "skill": "todo-app",
+      "action": "show_help",
+      "arguments": [
+        {
+          "name": "command",
+          "type": "string",
+          "required": false,
+          "description": "Show help for specific command",
+          "minLength": 1
+        },
+        {
+          "name": "category",
+          "type": "enum",
+          "required": false,
+          "description": "Filter by category",
+          "enum": ["all", "Todo Management", "Docker & Infrastructure", "Testing & Quality", "Deployment", "Code Quality", "System & Utilities"],
+          "default": "all"
+        }
+      ],
+      "aliases": ["/?", "/h"],
+      "examples": [
+        "/help",
+        "/help command:docker up",
+        "/help category:Deployment",
+        "/?"
+      ],
+      "permission": "read",
+      "workflow": [
+        "List all available commands",
+        "Filter by category if specified",
+        "Show help for specific command if provided",
+        "Display formatted help"
+      ],
+      "responseTemplate": "🆘 **Help Center**\n\n{{#if command}}=== **/{{command}}** ===\n\n**Description**: {{description}}\n\n**Usage**:\n  {{usage}}\n\n**Arguments**:\n{{#each arguments}}  - `{{name}}` {{#if required}}(required){{/if}}: {{description}}{{#if enum}}\n    Values: {{enum.join(', ')}}{{/if}}{{#if default}}\n    Default: {{default}}{{/if}}\n{{/each}}\n\n**Examples**:\n{{#each examples}}  - {{.}}\n{{/each}}\n\n**Aliases**: {{aliases.join(', ')}}\n\n**Category**: {{category}}\n{{else}}{{#if category !== 'all'}}=== **{{category}}** ===\n\n{{/if}}{{#each categories}}{{#if category === 'all' || category === name}}**{{name}}**\n{{description}}\n\nAvailable Commands:\n{{#each commands}}  - `/{{name}}` - {{description}}\n{{/each}}\n{{/if}}{{/each}}{{#if category === 'all' && noCategory}}**All Categories**:\n{{#each categories}}**{{name}}**\n{{description}}\n\nCommands: {{commands.length}}\n\n{{/each}}{{/if}}{{/if}}"
+    },
+    {
+      "name": "info",
+      "description": "Show project and system information",
+      "skill": "todo-app",
+      "action": "show_info",
+      "arguments": [
+        {
+          "name": "section",
+          "type": "enum",
+          "required": false,
+          "description": "Specific section to show",
+          "enum": ["project", "system", "skills", "mcp", "all"],
+          "default": "all"
+        }
+      ],
+      "examples": [
+        "/info",
+        "/info section:project",
+        "/info section:system"
+      ],
+      "mcp": ["process", "filesystem"],
+      "permission": "read",
+      "workflow": [
+        "Gather project information",
+        "Gather system information",
+        "List loaded skills",
+        "List configured MCP servers",
+        "Filter by section if specified",
+        "Display formatted information"
+      ],
+      "responseTemplate": "ℹ️ **Project & System Information**\n\n{{#if section === 'project' || section === 'all'}}=== **📦 Project** ===\n\n**Name**: {{project.name}}\n**Description**: {{project.description}}\n**Version**: {{project.version}}\n**Repository**: {{project.repository}}\n\n**Architecture**:\n  Backend: {{project.backend}}\n  Frontend: {{project.frontend}}\n  Database: {{project.database}}\n\n**Tech Stack**:\n{{#each project.stack}}  - {{.}}\n{{/each}}\n\n**File Structure**:\n```\n{{project.structure}}\n```\n{{/if}}{{#if section === 'system' || section === 'all'}}=== **💻 System** ===\n\n**Operating System**: {{system.os}}\n**Platform**: {{system.platform}}\n**Architecture**: {{system.arch}}\n\n**Node.js**: {{system.nodeVersion}}\n**npm**: {{system.npmVersion}}\n**Python**: {{system.pythonVersion}}\n**Docker**: {{system.dockerVersion}}\n**Git**: {{system.gitVersion}}\n\n**Resource Usage**:\n  CPU: {{system.cpuUsage}}%\n  Memory: {{system.memoryUsage}}%\n  Disk: {{system.diskUsage}}%\n{{/if}}{{#if section === 'skills' || section === 'all'}}=== **🎯 Skills** ===\n\n**Loaded Skills**: {{skills.count}}\n\n{{#each skills.list}}**{{name}}**\n  Description: {{description}}\n  Auto-loaded: {{autoLoaded}}\n  File: {{file}}\n\n{{/each}}{{/if}}{{#if section === 'mcp' || section === 'all'}}=== **🤖 MCP Servers** ===\n\n**Configured Servers**: {{mcp.count}}\n**Active Servers**: {{mcp.active}}\n\n{{#each mcp.list}}**{{name}}**\n  Type: {{type}}\n  Status: {{status}}\n  Description: {{description}}\n\n{{/each}}{{/if}}"
+    },
+    {
+      "name": "status",
+      "description": "Show status of all services and systems",
+      "skill": "todo-app",
+      "action": "show_status",
+      "arguments": [
+        {
+          "name": "services",
+          "type": "boolean",
+          "required": false,
+          "description": "Check Docker service status",
+          "default": true
+        },
+        {
+          "name": "api",
+          "type": "boolean",
+          "required": false,
+          "description": "Check API health",
+          "default": true
+        },
+        {
+          "name": "details",
+          "type": "boolean",
+          "required": false,
+          "description": "Show detailed status information",
+          "default": false,
+          "aliases": ["-v"]
+        }
+      ],
+      "aliases": ["/health"],
+      "examples": [
+        "/status",
+        "/status services:false",
+        "/health details:true"
+      ],
+      "mcp": ["docker", "http"],
+      "permission": "read",
+      "workflow": [
+        "Check Docker container status if services=true",
+        "Check API health if api=true",
+        "Check Git status",
+        "Display comprehensive status report"
+      ],
+      "responseTemplate": "🌡️ **System Status**\n\n{{#if git}}=== **🪙 Git** ===\nBranch: {{git.branch}}\nCommit: {{git.commit}}\nStatus: {{git.status}}\n{{#if git.changes}}Changes: {{git.changes}}{{/if}}\n{{/if}}{{#if docker}}=== **🐳 Docker** ===\n{{#each docker.services}}**{{name}}**: {{status}} ({{uptime}})\n{{/each}}\n{{/if}}{{#if api}}=== **🌐 API** ===\nStatus: {{api.status}}\nURL: {{api.url}}\nResponse Time: {{api.responseTime}}ms\n\n**Endpoints**:\n{{#each api.endpoints}}  - {{method}} {{path}}: {{status}}\n{{/each}}{{/if}}{{#if details}}=== **📊 Details** ===\n{{#if docker}}**Containers**:\n{{#each docker.details}}{{name}}:\n  ID: {{id}}\n  Image: {{image}}\n  Ports: {{ports}}\n  Status: {{status}}\n\n{{/each}}{{/if}}{{#if api}}**API Details**:\n  Version: {{api.version}}\n  Docs: {{api.docsUrl}}\n  Uptime: {{api.uptime}}\n{{/if}}{{/if}}"
+    },
+    {
+      "name": "clean",
+      "description": "Clean up various project resources",
+      "skill": "todo-app",
+      "action": "clean_resources",
+      "arguments": [
+        {
+          "name": "cache",
+          "type": "boolean",
+          "required": false,
+          "description": "Clean build caches",
+          "default": true
+        },
+        {
+          "name": "node",
+          "type": "boolean",
+          "required": false,
+          "description": "Clean node_modules and package caches",
+          "default": true
+        },
+        {
+          "name": "python",
+          "type": "boolean",
+          "required": false,
+          "description": "Clean Python caches and __pycache__",
+          "default": true
+        },
+        {
+          "name": "docker",
+          "type": "boolean",
+          "required": false,
+          "description": "Clean Docker resources",
+          "default": false
+        },
+        {
+          "name": "all",
+          "type": "boolean",
+          "required": false,
+          "description": "Clean all resources",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/clean",
+        "/clean cache:true node:true",
+        "/clean all:true",
+        "/clean docker:true"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "write",
+      "confirmation": {
+        "enabled": true,
+        "message": "This will clean:{{#if cache}} build caches{{/if}}{{#if node}} node_modules{{/if}}{{#if python}} Python caches{{/if}}{{#if docker}} Docker resources{{/if}}. Continue?"
+      },
+      "workflow": [
+        "Clean specified resources",
+        "Display space reclaimed",
+        "Show cleanup summary"
+      ],
+      "responseTemplate": "🧹 **Cleanup Complete!**\n\n{{#if cache}}✅ **Build Caches**: Cleaned\n{{/if}}{{#if node}}✅ **Node.js**: Cleaned\n  - node_modules\n  - package-lock.json\n  - npm cache\n{{/if}}{{#if python}}✅ **Python**: Cleaned\n  - __pycache__\n  - .pytest_cache\n  - *.pyc files\n{{/if}}{{#if docker}}✅ **Docker**: Cleaned\n  - Stopped containers\n  - Dangling images\n  - Unused volumes\n{{/if}}\n\n---\n💾 **Space Reclaimed**: {{spaceReclaimed}}"
+    },
+    {
+      "name": "init",
+      "description": "Initialize or reset the project setup",
+      "skill": "todo-app",
+      "action": "initialize_project",
+      "arguments": [
+        {
+          "name": "full",
+          "type": "boolean",
+          "required": false,
+          "description": "Full reinitialization (removes existing setup)",
+          "default": false
+        },
+        {
+          "name": "services",
+          "type": "boolean",
+          "required": false,
+          "description": "Start Docker services after initialization",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/init",
+        "/init full:true",
+        "/init services:true"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "admin",
+      "confirmation": {
+        "enabled": true,
+        "message": "This will initialize the project{{#if full}} with full cleanup{{/if}}.{{#if services}} Docker services will be started{{/if}}. Continue?"
+      },
+      "workflow": [
+        "If full=true, clean existing setup",
+        "Install dependencies (bun install, npm ci, pip install)",
+        "Set up environment files",
+        "If services=true, start Docker services",
+        "Verify setup is complete"
+      ],
+      "responseTemplate": "✨ **Project Initialized!**\n\n{{#if cleaned}}✅ **Cleaned**: Previous setup removed\n{{/if}}✅ **Dependencies**: Installed\n  - Bun: Linting tools\n  - npm: Frontend dependencies\n  - pip: Python dependencies\n{{#if envCreated}}✅ **Environment**: .env file created\n{{/if}}{{#if services}}✅ **Services**: Docker containers started\n{{/if}}\n\n---\n🚀 **Ready to go!**\n\nRun `/status` to verify everything is working.\nRun `/help` to see available commands."
+    },
+    {
+      "name": "update",
+      "description": "Update project dependencies",
+      "skill": "todo-app",
+      "action": "update_dependencies",
+      "arguments": [
+        {
+          "name": "all",
+          "type": "boolean",
+          "required": false,
+          "description": "Update all dependencies",
+          "default": false
+        },
+        {
+          "name": "api",
+          "type": "boolean",
+          "required": false,
+          "description": "Update API dependencies",
+          "default": false
+        },
+        {
+          "name": "web",
+          "type": "boolean",
+          "required": false,
+          "description": "Update web dependencies",
+          "default": false
+        },
+        {
+          "name": "bun",
+          "type": "boolean",
+          "required": false,
+          "description": "Update Bun dependencies",
+          "default": false
+        },
+        {
+          "name": "major",
+          "type": "boolean",
+          "required": false,
+          "description": "Update to major versions only",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/update",
+        "/update all:true",
+        "/update api:true web:true",
+        "/update major:true"
+      ],
+      "mcp": ["process"],
+      "permission": "write",
+      "workflow": [
+        "Update specified dependencies",
+        "Show what was updated",
+        "Display version changes"
+      ],
+      "responseTemplate": "🔄 **Dependencies Updated!**\n\n{{#if api}}=== **API (Python)** ===\n{{#each api}}  {{name}}: {{oldVersion}} → {{newVersion}}\n{{/each}}{{/if}}{{#if web}}=== **Web (Node.js)** ===\n{{#each web}}  {{name}}: {{oldVersion}} → {{newVersion}}\n{{/each}}{{/if}}{{#if bun}}=== **Bun** ===\n{{#each bun}}  {{name}}: {{oldVersion}} → {{newVersion}}\n{{/each}}{{/if}}\n\n---\n📦 **Summary**:\n  Packages updated: {{total}}\n  Breaking changes: {{breaking}}\n  Security updates: {{security}}"
+    },
+    {
+      "name": "version",
+      "description": "Show version information",
+      "skill": "todo-app",
+      "action": "show_versions",
+      "arguments": [
+        {
+          "name": "component",
+          "type": "enum",
+          "required": false,
+          "description": "Show version for specific component",
+          "enum": ["all", "api", "web", "docker", "vibe", "system"],
+          "default": "all"
+        }
+      ],
+      "aliases": ["/v", "/ver"],
+      "examples": [
+        "/version",
+        "/v component:api",
+        "/ver component:vibe"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Get version for each component",
+        "Filter by component if specified",
+        "Display version information"
+      ],
+      "responseTemplate": "📋 **Version Information**\n\n{{#if component === 'all' || component === 'api'}}=== **🐍 API (Python)** ===\nFastAPI: {{api.fastapi}}\nSQLAlchemy: {{api.sqlalchemy}}\nPydantic: {{api.pydantic}}\nUvicorn: {{api.uvicorn}}\nPython: {{api.python}}\n{{/if}}{{#if component === 'all' || component === 'web'}}=== **🦊 Web (SvelteKit)** ===\nSvelteKit: {{web.sveltekit}}\nSvelte: {{web.svelte}}\nTypeScript: {{web.typescript}}\nVite: {{web.vite}}\nTailwind: {{web.tailwind}}\nNode.js: {{web.node}}\nnpm: {{web.npm}}\n{{/if}}{{#if component === 'all' || component === 'docker'}}=== **🐳 Docker** ===\nDocker: {{docker.version}}\nDocker Compose: {{docker.compose}}\n{{/if}}{{#if component === 'all' || component === 'vibe'}}=== **🎯 Vibe** ===\nVibe CLI: {{vibe.version}}\nSkills: {{vibe.skills}}\nMCP Servers: {{vibe.mcp}}\n{{/if}}{{#if component === 'all' || component === 'system'}}=== **💻 System** ===\nOS: {{system.os}}\nArchitecture: {{system.arch}}\nCPU: {{system.cpu}}\nMemory: {{system.memory}}\n{{/if}}"
+    },
+    {
+      "name": "echo",
+      "description": "Echo a message (for testing commands)",
+      "skill": "todo-app",
+      "action": "echo_message",
+      "arguments": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Message to echo",
+          "minLength": 1
+        },
+        {
+          "name": "repeat",
+          "type": "number",
+          "required": false,
+          "description": "Number of times to repeat",
+          "default": 1,
+          "min": 1,
+          "max": 10
+        }
+      ],
+      "examples": [
+        "/echo Hello World!",
+        "/echo "Test message" repeat:3"
+      ],
+      "permission": "read",
+      "workflow": [
+        "Repeat message specified number of times",
+        "Display formatted output"
+      ],
+      "responseTemplate": "{{#repeat repeat}}🔁 {{message}}\n{{/repeat}}"
+    },
+    {
+      "name": "time",
+      "description": "Show current time and date",
+      "skill": "todo-app",
+      "action": "show_time",
+      "arguments": [
+        {
+          "name": "format",
+          "type": "enum",
+          "required": false,
+          "description": "Time format",
+          "enum": ["full", "date", "time", "iso", "unix"],
+          "default": "full"
+        },
+        {
+          "name": "timezone",
+          "type": "string",
+          "required": false,
+          "description": "Timezone (e.g., UTC, America/New_York)",
+          "default": "local"
+        }
+      ],
+      "examples": [
+        "/time",
+        "/time format:date",
+        "/time format:iso timezone:UTC"
+      ],
+      "permission": "read",
+      "workflow": [
+        "Get current time in specified format",
+        "Display time information"
+      ],
+      "responseTemplate": "⏰ **Current Time**\n\n{{#if format === 'full'}}**Date**: {{date}}\n**Time**: {{time}}\n**Timezone**: {{timezone}}\n**ISO**: {{iso}}\n**Unix**: {{unix}}{{/if}}{{#if format === 'date'}}**Date**: {{date}}{{/if}}{{#if format === 'time'}}**Time**: {{time}}{{/if}}{{#if format === 'iso'}}**ISO 8601**: {{iso}}{{/if}}{{#if format === 'unix'}}**Unix Timestamp**: {{unix}}{{/if}}"
+    }
+  ]
+}

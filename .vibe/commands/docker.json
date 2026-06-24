@@ -1,0 +1,395 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/spec/main/schema/command.json",
+  "category": "Docker & Infrastructure",
+  "description": "Commands for managing Docker containers and services",
+  "dependencies": ["docker", "process"],
+  "commands": [
+    {
+      "name": "docker up",
+      "description": "Start all services defined in docker-compose.yml",
+      "skill": "docker",
+      "action": "start_services",
+      "arguments": [
+        {
+          "name": "build",
+          "type": "boolean",
+          "required": false,
+          "description": "Build images before starting",
+          "default": true
+        },
+        {
+          "name": "detach",
+          "type": "boolean",
+          "required": false,
+          "description": "Run containers in background",
+          "default": true,
+          "aliases": ["-d"]
+        },
+        {
+          "name": "services",
+          "type": "array",
+          "required": false,
+          "description": "Specific services to start (default: all)",
+          "itemType": "string",
+          "enum": ["db", "api", "web", "all"],
+          "default": ["all"]
+        }
+      ],
+      "aliases": ["/docker start", "/compose up"],
+      "examples": [
+        "/docker up",
+        "/docker up build:false",
+        "/docker up detach:false",
+        "/docker up services:[api,web]"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "write",
+      "workflow": [
+        "Check if Docker is running",
+        "Build images if build=true",
+        "Start specified services with docker compose",
+        "Display service status",
+        "Show access URLs"
+      ],
+      "responseTemplate": "✅ **Services Started!**\n\n{{#each services}}🐳 **{{name}}**: {{status}}\n   URL: {{url || 'N/A'}}\n{{/each}}\n\n💡 **Access your application:**\n   - API: http://localhost:8000\n   - Web: http://localhost:5173\n   - API Docs: http://localhost:8000/docs\n\n📝 **Logs**: Run `/docker logs` to view service logs"
+    },
+    {
+      "name": "docker down",
+      "description": "Stop and remove containers, networks, and volumes",
+      "skill": "docker",
+      "action": "stop_services",
+      "arguments": [
+        {
+          "name": "volumes",
+          "type": "boolean",
+          "required": false,
+          "description": "Remove named volumes (WARNING: data loss)",
+          "default": false,
+          "aliases": ["-v"]
+        },
+        {
+          "name": "services",
+          "type": "array",
+          "required": false,
+          "description": "Specific services to stop",
+          "itemType": "string",
+          "enum": ["db", "api", "web", "all"],
+          "default": ["all"]
+        }
+      ],
+      "aliases": ["/docker stop", "/compose down"],
+      "examples": [
+        "/docker down",
+        "/docker down volumes:true",
+        "/docker stop services:[api]"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "write",
+      "confirmation": {
+        "enabled": true,
+        "message": "This will stop and remove containers{{#if volumes}} and volumes{{/if}}. Continue?",
+        "skipIf": "services.length === 0 && volumes === false"
+      },
+      "workflow": [
+        "Stop specified containers",
+        "Remove containers and networks",
+        "Remove volumes if volumes=true",
+        "Confirm cleanup"
+      ],
+      "responseTemplate": "⏹️ **Services Stopped!**\n\n{{#each removed}}✅ **{{name}}**: Removed\n{{/each}}\n{{#if volumes}}⚠️ **Volumes removed** - Data has been deleted!{{/if}}"
+    },
+    {
+      "name": "docker restart",
+      "description": "Restart specific services",
+      "skill": "docker",
+      "action": "restart_services",
+      "arguments": [
+        {
+          "name": "services",
+          "type": "array",
+          "required": true,
+          "description": "Services to restart",
+          "itemType": "string",
+          "enum": ["db", "api", "web", "all"],
+          "minItems": 1
+        }
+      ],
+      "aliases": ["/docker reload"],
+      "examples": [
+        "/docker restart services:[api]",
+        "/docker restart services:[api,web]",
+        "/docker reload services:[all]"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "write",
+      "workflow": [
+        "Restart each specified service",
+        "Wait for services to be healthy",
+        "Verify restart was successful"
+      ],
+      "responseTemplate": "🔄 **Services Restarted!**\n\n{{#each services}}✅ **{{name}}**: Restarted and healthy\n{{/each}}"
+    },
+    {
+      "name": "docker logs",
+      "description": "View logs for running services",
+      "skill": "docker",
+      "action": "view_logs",
+      "arguments": [
+        {
+          "name": "services",
+          "type": "array",
+          "required": false,
+          "description": "Services to show logs for",
+          "itemType": "string",
+          "enum": ["db", "api", "web", "all"],
+          "default": ["all"]
+        },
+        {
+          "name": "follow",
+          "type": "boolean",
+          "required": false,
+          "description": "Follow log output in real-time",
+          "default": false,
+          "aliases": ["-f"]
+        },
+        {
+          "name": "tail",
+          "type": "number",
+          "required": false,
+          "description": "Number of lines to show from each container",
+          "default": 100,
+          "min": 1,
+          "max": 10000
+        }
+      ],
+      "aliases": ["/docker log"],
+      "examples": [
+        "/docker logs",
+        "/docker logs services:[api] follow:true",
+        "/docker logs tail:50"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "read",
+      "workflow": [
+        "Check which services are running",
+        "Display logs for each service",
+        "Format output with service names"
+      ],
+      "responseTemplate": "📜 **Service Logs**\n\n{{#each services}}=== **{{name}}** ===\n{{{logs}}}\n{{/each}}\n\n💡 **Tip**: Use `follow:true` to stream logs in real-time"
+    },
+    {
+      "name": "docker ps",
+      "description": "List running containers and their status",
+      "skill": "docker",
+      "action": "list_containers",
+      "arguments": [
+        {
+          "name": "all",
+          "type": "boolean",
+          "required": false,
+          "description": "Show all containers (including stopped)",
+          "default": false,
+          "aliases": ["-a"]
+        }
+      ],
+      "aliases": ["/docker status", "/compose ps"],
+      "examples": [
+        "/docker ps",
+        "/docker ps all:true"
+      ],
+      "mcp": ["docker"],
+      "permission": "read",
+      "workflow": [
+        "List all containers",
+        "Filter by project if needed",
+        "Format status information"
+      ],
+      "responseTemplate": "🚢 **Running Containers**\n\n{{#if containers}}{{#each containers}}🟢 **{{name}}** ({{id.short}})\n   Status: {{status}}\n   Ports: {{ports}}\n   Uptime: {{uptime}}\n{{/each}}{{else}}No containers running. Start services with `/docker up`{{/if}}"
+    },
+    {
+      "name": "docker build",
+      "description": "Build Docker images without starting containers",
+      "skill": "docker",
+      "action": "build_images",
+      "arguments": [
+        {
+          "name": "services",
+          "type": "array",
+          "required": false,
+          "description": "Specific services to build",
+          "itemType": "string",
+          "enum": ["api", "web", "all"],
+          "default": ["all"]
+        },
+        {
+          "name": "noCache",
+          "type": "boolean",
+          "required": false,
+          "description": "Build without cache",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/docker build",
+        "/docker build services:[api]",
+        "/docker build noCache:true"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "write",
+      "workflow": [
+        "Build each specified service image",
+        "Show build progress",
+        "Display final image sizes"
+      ],
+      "responseTemplate": "🏗️ **Images Built!**\n\n{{#each images}}✅ **{{name}}**: Built\n   Size: {{size}}\n   Tag: {{tag}}\n{{/each}}"
+    },
+    {
+      "name": "docker exec",
+      "description": "Execute a command in a running container",
+      "skill": "docker",
+      "action": "execute_command",
+      "arguments": [
+        {
+          "name": "service",
+          "type": "string",
+          "required": true,
+          "description": "Service/container to execute command in",
+          "enum": ["api", "web", "db"]
+        },
+        {
+          "name": "command",
+          "type": "string",
+          "required": true,
+          "description": "Command to execute",
+          "minLength": 1
+        },
+        {
+          "name": "user",
+          "type": "string",
+          "required": false,
+          "description": "User to run command as",
+          "default": "appuser"
+        }
+      ],
+      "examples": [
+        "/docker exec api bash",
+        "/docker exec api "python -c 'print(2+2)'"",
+        "/docker exec web sh"
+      ],
+      "mcp": ["docker", "process"],
+      "permission": "write",
+      "workflow": [
+        "Verify container is running",
+        "Execute command in container",
+        "Display output"
+      ],
+      "responseTemplate": "💻 **Command Output** ({{service}})\n\n```\n{{output}}\n```\n\nExit Code: {{exitCode}}"
+    },
+    {
+      "name": "docker health",
+      "description": "Check health status of all services",
+      "skill": "docker",
+      "action": "check_health",
+      "arguments": [],
+      "aliases": ["/health check", "/status"],
+      "examples": [
+        "/docker health"
+      ],
+      "mcp": ["docker", "http"],
+      "permission": "read",
+      "workflow": [
+        "Check Docker container health",
+        "Test API endpoint",
+        "Test database connection",
+        "Display comprehensive health report"
+      ],
+      "responseTemplate": "🏥 **Health Check Report**\n\n{{#each services}}**{{name}}**: {{#if healthy}}✅ Healthy{{else}}❌ Unhealthy{{/if}}\n   {{#if details}}Details: {{details}}{{/if}}\n{{/each}}\n\n---\n📊 **Overall Status**: {{#if allHealthy}}✅ All systems operational{{else}}⚠️ Some services need attention{{/if}}"
+    },
+    {
+      "name": "docker clean",
+      "description": "Clean up unused Docker resources",
+      "skill": "docker",
+      "action": "clean_resources",
+      "arguments": [
+        {
+          "name": "images",
+          "type": "boolean",
+          "required": false,
+          "description": "Remove dangling images",
+          "default": true
+        },
+        {
+          "name": "containers",
+          "type": "boolean",
+          "required": false,
+          "description": "Remove stopped containers",
+          "default": true
+        },
+        {
+          "name": "volumes",
+          "type": "boolean",
+          "required": false,
+          "description": "Remove unused volumes (WARNING: data loss)",
+          "default": false
+        },
+        {
+          "name": "system",
+          "type": "boolean",
+          "required": false,
+          "description": "Run full system prune",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/docker clean",
+        "/docker clean images:false",
+        "/docker clean system:true"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "write",
+      "confirmation": {
+        "enabled": true,
+        "message": "This will remove{{#if images}} dangling images{{/if}}{{#if containers}} and stopped containers{{/if}}{{#if volumes}} and unused volumes{{/if}}{{#if system}} and all unused resources{{/if}}. Continue?"
+      },
+      "workflow": [
+        "Clean specified Docker resources",
+        "Display space reclaimed"
+      ],
+      "responseTemplate": "🧹 **Cleanup Complete!**\n\n{{#if removed.images}}🗑️ **Images**: {{removed.images}} removed\n{{/if}}{{#if removed.containers}}🗑️ **Containers**: {{removed.containers}} removed\n{{/if}}{{#if removed.volumes}}⚠️ **Volumes**: {{removed.volumes}} removed\n{{/if}}{{#if removed.system}}💥 **System**: Full cleanup performed\n{{/if}}\n💾 **Space Reclaimed**: {{spaceReclaimed}}"
+    },
+    {
+      "name": "docker shell",
+      "description": "Open a shell in a specific service container",
+      "skill": "docker",
+      "action": "open_shell",
+      "arguments": [
+        {
+          "name": "service",
+          "type": "string",
+          "required": true,
+          "description": "Service to open shell in",
+          "enum": ["api", "web", "db"]
+        },
+        {
+          "name": "user",
+          "type": "string",
+          "required": false,
+          "description": "User for the shell",
+          "default": "appuser"
+        }
+      ],
+      "examples": [
+        "/docker shell api",
+        "/docker shell web",
+        "/docker shell db user:postgres"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "write",
+      "workflow": [
+        "Check if container is running",
+        "Open interactive shell session"
+      ],
+      "responseTemplate": "🐚 **Shell Session Starting**\n\nConnecting to **{{service}}** container as **{{user}}**...\n\nUse `exit` or `Ctrl+D` to quit.\n\n💡 **Tip**: Common commands:\n   - API: `python -c 'from main import app; print(app)'`\n   - Web: `npm run dev`\n   - DB: `psql -U todo_user -d tododb`"
+    }
+  ]
+}

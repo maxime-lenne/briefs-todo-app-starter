@@ -1,0 +1,323 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/spec/main/schema/command.json",
+  "category": "Todo Management",
+  "description": "Commands for managing to-do items directly from Vibe",
+  "commands": [
+    {
+      "name": "todo add",
+      "description": "Add a new todo item to the database",
+      "skill": "todo-app",
+      "action": "create_todo_item",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Title of the todo (1-200 characters)",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Optional description (max 500 characters)",
+          "maxLength": 500
+        },
+        {
+          "name": "completed",
+          "type": "boolean",
+          "required": false,
+          "description": "Initial completion status",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/todo add Buy groceries",
+        "/todo add "Fix API bug" "Investigate the database connection issue"",
+        "/todo add "Write tests" true"
+      ],
+      "mcp": ["process", "http"],
+      "permission": "write",
+      "workflow": [
+        "Validate title is not empty",
+        "Send POST request to /api/todos",
+        "Display created todo with ID",
+        "Suggest next actions"
+      ],
+      "responseTemplate": "✅ Todo created successfully!\n\n**ID**: {{id}}\n**Title**: {{title}}\n**Description**: {{description || '(none)'}}\n**Status**: {{completed ? '✅ Completed' : '⏳ Active'}}\n\nWould you like to add another todo or view the list?"
+    },
+    {
+      "name": "todo list",
+      "description": "List all todo items with optional filtering",
+      "skill": "todo-app",
+      "action": "list_todo_items",
+      "arguments": [
+        {
+          "name": "filter",
+          "type": "enum",
+          "required": false,
+          "description": "Filter by status",
+          "enum": ["all", "active", "completed"],
+          "default": "all"
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false,
+          "description": "Maximum number of items to display",
+          "default": 50,
+          "min": 1,
+          "max": 1000
+        }
+      ],
+      "examples": [
+        "/todo list",
+        "/todo list active",
+        "/todo list completed",
+        "/todo list all 10"
+      ],
+      "mcp": ["http"],
+      "permission": "read",
+      "workflow": [
+        "Send GET request to /api/todos",
+        "Filter by status if specified",
+        "Format and display results with statistics"
+      ],
+      "responseTemplate": "📋 **Todo List** ({{filter === 'all' ? 'All' : filter === 'active' ? 'Active' : 'Completed'}})\n\n{{#each todos}}{{completed ? '✅' : '⬜'}} **{{id}}. {{title}}**{{#if description}}\n   *{{description}}*{{/if}}\n{{/each}}\n\n---\n📊 **Stats**: {{total}} total • {{active}} active • {{completed}} completed\n\n*Showing {{displayed}} of {{total}} items*"/todo list all 5"
+    },
+    {
+      "name": "todo show",
+      "description": "Show details of a specific todo item",
+      "skill": "todo-app",
+      "action": "get_todo_item",
+      "arguments": [
+        {
+          "name": "id",
+          "type": "number",
+          "required": true,
+          "description": "ID of the todo item",
+          "min": 1
+        }
+      ],
+      "aliases": ["/todo get", "/todo view"],
+      "examples": [
+        "/todo show 1",
+        "/todo get 5",
+        "/todo view 3"
+      ],
+      "mcp": ["http"],
+      "permission": "read",
+      "workflow": [
+        "Send GET request to /api/todos/{id}",
+        "Display detailed todo information",
+        "Show related actions"
+      ],
+      "responseTemplate": "📝 **Todo #{{id}}**\n\n**Title**: {{title}}\n**Description**: {{description || '(none)'}}\n**Status**: {{completed ? '✅ Completed' : '⏳ Active'}}\n**Created**: {{created_at}}\n**Updated**: {{updated_at || 'Never'}}\n\n---\n🔧 **Actions**: `/todo toggle {{id}}` • `/todo edit {{id}}` • `/todo delete {{id}}`"
+    },
+    {
+      "name": "todo toggle",
+      "description": "Toggle the completion status of a todo item",
+      "skill": "todo-app",
+      "action": "toggle_todo_status",
+      "arguments": [
+        {
+          "name": "id",
+          "type": "number",
+          "required": true,
+          "description": "ID of the todo item",
+          "min": 1
+        }
+      ],
+      "examples": [
+        "/todo toggle 1",
+        "/todo toggle 5"
+      ],
+      "mcp": ["http"],
+      "permission": "write",
+      "workflow": [
+        "Send PUT request to /api/todos/{id}",
+        "Toggle completed status",
+        "Confirm update"
+      ],
+      "responseTemplate": "✅ **Todo #{{id}}** {{newStatus ? 'marked as completed' : 'marked as active'}}\n\n**Title**: {{title}}\n**Previous Status**: {{oldStatus ? 'Completed' : 'Active'}}\n**New Status**: {{newStatus ? 'Completed' : 'Active'}}"
+    },
+    {
+      "name": "todo edit",
+      "description": "Edit an existing todo item",
+      "skill": "todo-app",
+      "action": "update_todo_item",
+      "arguments": [
+        {
+          "name": "id",
+          "type": "number",
+          "required": true,
+          "description": "ID of the todo item",
+          "min": 1
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "New title (1-200 characters)",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "New description (max 500 characters)",
+          "maxLength": 500
+        },
+        {
+          "name": "completed",
+          "type": "boolean",
+          "required": false,
+          "description": "New completion status"
+        }
+      ],
+      "examples": [
+        "/todo edit 1 title:\"Updated title\"",
+        "/todo edit 2 description:\"New description\"",
+        "/todo edit 3 completed:true"
+      ],
+      "mcp": ["http"],
+      "permission": "write",
+      "workflow": [
+        "Validate at least one field is provided",
+        "Send PUT request to /api/todos/{id}",
+        "Display updated todo information"
+      ],
+      "responseTemplate": "✏️ **Todo #{{id}}** updated successfully!\n\n{{#if title}}**Title**: {{title}}{{/if}}{{#if description}}\n**Description**: {{description}}{{/if}}{{#if completed}}\n**Status**: {{completed ? '✅ Completed' : '⏳ Active'}}{{/if}}"
+    },
+    {
+      "name": "todo delete",
+      "description": "Delete a todo item permanently",
+      "skill": "todo-app",
+      "action": "delete_todo_item",
+      "arguments": [
+        {
+          "name": "id",
+          "type": "number",
+          "required": true,
+          "description": "ID of the todo item to delete",
+          "min": 1
+        },
+        {
+          "name": "force",
+          "type": "boolean",
+          "required": false,
+          "description": "Skip confirmation prompt",
+          "default": false
+        }
+      ],
+      "aliases": ["/todo remove", "/todo rm"],
+      "examples": [
+        "/todo delete 1",
+        "/todo remove 5",
+        "/todo rm 3 force:true"
+      ],
+      "mcp": ["http"],
+      "permission": "write",
+      "confirmation": {
+        "enabled": true,
+        "message": "Are you sure you want to delete todo #{{id}}: "{{title}}"?",
+        "skipIf": "force=true"
+      },
+      "workflow": [
+        "If not forced, ask for confirmation",
+        "Send DELETE request to /api/todos/{id}",
+        "Confirm deletion"
+      ],
+      "responseTemplate": "🗑️ **Todo #{{id}}** deleted successfully!\n\n**Title**: {{title}}"
+    },
+    {
+      "name": "todo search",
+      "description": "Search todos by title or description",
+      "skill": "todo-app",
+      "action": "search_todo_items",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Search term to look for in titles and descriptions",
+          "minLength": 1
+        },
+        {
+          "name": "filter",
+          "type": "enum",
+          "required": false,
+          "description": "Filter by status",
+          "enum": ["all", "active", "completed"],
+          "default": "all"
+        }
+      ],
+      "examples": [
+        "/todo search bug",
+        "/todo search "API" active",
+        "/todo search fix"
+      ],
+      "mcp": ["http"],
+      "permission": "read",
+      "workflow": [
+        "Send GET request to /api/todos",
+        "Filter results by query (case-insensitive)",
+        "Filter by status if specified",
+        "Display matching results"
+      ],
+      "responseTemplate": "🔍 **Search Results for \"{{query}}\"** ({{filter}})\n\n{{#if results}}{{#each results}}{{completed ? '✅' : '⬜'}} **{{id}}. {{title}}**{{#if description}}\n   *{{description}}*{{/if}}\n{{/each}}{{else}}No todos found matching \"{{query}}\"{{/if}}\n\n---\nFound {{count}} {{count === 1 ? 'result' : 'results'}}"
+    },
+    {
+      "name": "todo clear",
+      "description": "Delete all todo items (DANGEROUS)",
+      "skill": "todo-app",
+      "action": "delete_all_todos",
+      "arguments": [
+        {
+          "name": "force",
+          "type": "boolean",
+          "required": true,
+          "description": "Must explicitly confirm with force=true",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/todo clear force:true"
+      ],
+      "mcp": ["http"],
+      "permission": "admin",
+      "confirmation": {
+        "enabled": true,
+        "message": "⚠️ DANGER: This will delete ALL todos permanently! Type 'DELETE ALL' to confirm:",
+        "requireInput": true,
+        "expectedInput": "DELETE ALL"
+      },
+      "workflow": [
+        "Require explicit confirmation",
+        "Send DELETE requests for all todos",
+        "Confirm all deleted"
+      ],
+      "responseTemplate": "💥 **All todos deleted!**\n\n{{count}} todos were permanently removed from the database."
+    },
+    {
+      "name": "todo stats",
+      "description": "Show todo statistics",
+      "skill": "todo-app",
+      "action": "get_todo_stats",
+      "arguments": [],
+      "examples": [
+        "/todo stats"
+      ],
+      "mcp": ["http"],
+      "permission": "read",
+      "workflow": [
+        "Send GET request to /api/todos",
+        "Calculate statistics",
+        "Display formatted results"
+      ],
+      "responseTemplate": "📊 **Todo Statistics**\n\n📝 **Total**: {{total}}\n✅ **Completed**: {{completed}} ({{percentCompleted}}%)\n⏳ **Active**: {{active}} ({{percentActive}}%)\n\n📈 **Progress**: {{percentCompleted}}% complete\n\n{{#if averageAge}}⏱️ **Average Age**: {{averageAge}} days{{/if}}"
+    }
+  ]
+}
