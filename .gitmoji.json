@@ -1,0 +1,207 @@
+{
+  "emojis": [
+    {
+      "emoji": "💥",
+      "entity": "&boom;",
+      "code": ":boom:",
+      "description": "Introducing breaking changes",
+      "name": "Breaking Changes"
+    },
+    {
+      "emoji": "✨",
+      "entity": "&sparkles;",
+      "code": ":sparkles:",
+      "description": "Introducing new features",
+      "name": "New Features"
+    },
+    {
+      "emoji": "📝",
+      "entity": "&memo;",
+      "code": ":memo:",
+      "description": "Writing docs",
+      "name": "Documentation"
+    },
+    {
+      "emoji": "🚀",
+      "entity": "&rocket;",
+      "code": ":rocket:",
+      "description": "Deploying stuff",
+      "name": "Deployment"
+    },
+    {
+      "emoji": "🐛",
+      "entity": "&bug;",
+      "code": ":bug:",
+      "description": "Fixing a bug",
+      "name": "Bug Fixes"
+    },
+    {
+      "emoji": "🔥",
+      "entity": "&fire;",
+      "code": ":fire:",
+      "description": "Removing code or files",
+      "name": "Removal"
+    },
+    {
+      "emoji": "✅",
+      "entity": "&check;",
+      "code": ":heavy_check_mark:",
+      "description": "Adding tests",
+      "name": "Tests"
+    },
+    {
+      "emoji": "🎉",
+      "entity": "&tada;",
+      "code": ":tada:",
+      "description": "Initial commit",
+      "name": "Initial Commit"
+    },
+    {
+      "emoji": "🔧",
+      "entity": "&gear;",
+      "code": ":gear:",
+      "description": "Adding new dependencies",
+      "name": "Dependencies"
+    },
+    {
+      "emoji": "🏗️",
+      "entity": "&construction;",
+      "code": ":construction:",
+      "description": "Work in progress",
+      "name": "WIP"
+    },
+    {
+      "emoji": "📦",
+      "entity": "&package;",
+      "code": ":package:",
+      "description": "Upgrading dependencies",
+      "name": "Dependencies Upgrades"
+    },
+    {
+      "emoji": "🔒",
+      "entity": "&locked;",
+      "code": ":locked:",
+      "description": "Fixing security issues",
+      "name": "Security"
+    },
+    {
+      "emoji": "⚡️",
+      "entity": "&zap;",
+      "code": ":zap:",
+      "description": "Improving performance",
+      "name": "Performance"
+    },
+    {
+      "emoji": "🌐",
+      "entity": "&globe_with_meridians;",
+      "code": ":globe_with_meridians:",
+      "description": "Internationalization and localization",
+      "name": "Internationalization"
+    },
+    {
+      "emoji": "📊",
+      "entity": "&bar_chart;",
+      "code": ":bar_chart:",
+      "description": "Adding or updating analytics",
+      "name": "Analytics"
+    },
+    {
+      "emoji": "👷",
+      "entity": "&busts_in_silhouette;",
+      "code": ":busts_in_silhouette:",
+      "description": "Adding or updating contributors",
+      "name": "Contributors"
+    },
+    {
+      "emoji": "🎨",
+      "entity": "&art;",
+      "code": ":art:",
+      "description": "Improving structure or format of the code",
+      "name": "Code Style"
+    },
+    {
+      "emoji": "🏷️",
+      "entity": "&label;",
+      "code": ":label:",
+      "description": "Adding or updating tags",
+      "name": "Tags"
+    },
+    {
+      "emoji": "🔍",
+      "entity": "&mag;",
+      "code": ":mag:",
+      "description": "Adding or updating SEO",
+      "name": "SEO"
+    },
+    {
+      "emoji": "⏪",
+      "entity": "&rewind;",
+      "code": ":rewind:",
+      "description": "Reverting changes",
+      "name": "Revert"
+    },
+    {
+      "emoji": "🧹",
+      "entity": "&broom;",
+      "code": ":broom:",
+      "description": "Linters and general cleanup",
+      "name": "Cleanup"
+    },
+    {
+      "emoji": "🚧",
+      "entity": "&construction_sign;",
+      "code": ":construction:",
+      "description": "Adding or updating CI build system",
+      "name": "CI"
+    },
+    {
+      "emoji": "💚",
+      "entity": "&green_heart;",
+      "code": ":green_heart:",
+      "description": "Fixing the CI Build",
+      "name": "CI Fix"
+    },
+    {
+      "emoji": "❤️",
+      "entity": "&heart;",
+      "code": ":heart:",
+      "description": "Fixing the Build",
+      "name": "Build Fix"
+    },
+    {
+      "emoji": "📜",
+      "entity": "&scroll;",
+      "code": ":scroll:",
+      "description": "Adding or updating license",
+      "name": "License"
+    },
+    {
+      "emoji": "📌",
+      "entity": "&pushpin;",
+      "code": ":pushpin:",
+      "description": "Pinning dependencies to specific versions",
+      "name": "Pin Dependencies"
+    },
+    {
+      "emoji": "🔐",
+      "entity": "&closed_lock_with_key;",
+      "code": ":closed_lock_with_key:",
+      "description": "Working on SSO or OAuth",
+      "name": "Authentication"
+    }
+  ],
+  "scopes": [],
+  "types": [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "refactor",
+    "revert",
+    "style",
+    "test"
+  ]
+}
