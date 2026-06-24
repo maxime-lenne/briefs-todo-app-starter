@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^19.0.0",
-    "@commitlint/config-gitmoji": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
@@ -38,7 +38,6 @@
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-svelte": "^2.0.0",
     "gitmoji-cli": "^9.0.0",
-    "hadolint": "^14.0.0",
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "markdownlint-cli2": "^0.12.0",
@@ -47,8 +46,7 @@
     "prettier-plugin-tailwindcss": "^0.5.0",
     "semantic-release": "^24.0.0",
     "standard-version": "^9.5.0",
-    "svelte-eslint-parser": "^0.30.0",
-    "yamllint": "^0.3.1"
+    "svelte-eslint-parser": "^0.30.0"
   },
   "lint-staged": {
     "*.{js,ts,svelte}": [
