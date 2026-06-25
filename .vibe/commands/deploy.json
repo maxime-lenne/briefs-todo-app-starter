@@ -1,0 +1,439 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/spec/main/schema/command.json",
+  "category": "Deployment",
+  "description": "Commands for deploying the application to various platforms",
+  "dependencies": ["docker", "testing"],
+  "commands": [
+    {
+      "name": "deploy",
+      "description": "Deploy the application (default: Railway)",
+      "skill": "docker",
+      "action": "deploy_application",
+      "arguments": [
+        {
+          "name": "platform",
+          "type": "enum",
+          "required": false,
+          "description": "Deployment platform",
+          "enum": ["railway", "render", "dockerhub", "github", "vercel", "local"],
+          "default": "railway"
+        },
+        {
+          "name": "environment",
+          "type": "enum",
+          "required": false,
+          "description": "Deployment environment",
+          "enum": ["production", "staging", "development"],
+          "default": "production"
+        },
+        {
+          "name": "build",
+          "type": "boolean",
+          "required": false,
+          "description": "Build images before deploying",
+          "default": true
+        },
+        {
+          "name": "test",
+          "type": "boolean",
+          "required": false,
+          "description": "Run tests before deploying",
+          "default": true
+        },
+        {
+          "name": "force",
+          "type": "boolean",
+          "required": false,
+          "description": "Force redeploy even if no changes",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/deploy",
+        "/deploy platform:railway",
+        "/deploy environment:staging test:false",
+        "/deploy platform:dockerhub force:true"
+      ],
+      "mcp": ["process", "docker", "github"],
+      "permission": "admin",
+      "confirmation": {
+        "enabled": true,
+        "message": "Ready to deploy to {{platform}} ({{environment}}). Run tests first? {{test}}. Continue?"
+      },
+      "workflow": [
+        "If test=true, run tests with /test",
+        "If build=true, build images with /docker build",
+        "Deploy based on platform selection",
+        "Display deployment information",
+        "Show access URLs"
+      ],
+      "responseTemplate": "🚀 **Deployment Successful!**\n\n📦 **Platform**: {{platform}}\n🌍 **Environment**: {{environment}}\n✅ **Build**: {{buildStatus}}\n✅ **Tests**: {{testStatus}}\n\n---\n🔗 **Access Your Application**\n\n{{#each urls}}**{{name}}**: {{url}}\n{{/each}}\n\n---\n📝 **Deployment ID**: {{deploymentId}}\n🕒 **Deployed at**: {{deployedAt}}\n\n💡 **Next Steps**:\n- Run `/deploy status` to check deployment status\n- Run `/deploy logs` to view deployment logs\n- Run `/health` to verify services are running"
+    },
+    {
+      "name": "deploy railway",
+      "description": "Deploy to Railway.app",
+      "skill": "docker",
+      "action": "deploy_to_railway",
+      "arguments": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "Railway project name",
+          "default": "briefs-todo-app-starter"
+        },
+        {
+          "name": "services",
+          "type": "array",
+          "required": false,
+          "description": "Services to deploy",
+          "itemType": "string",
+          "enum": ["api", "web", "db", "all"],
+          "default": ["all"]
+        },
+        {
+          "name": "env",
+          "type": "object",
+          "required": false,
+          "description": "Environment variables to set",
+          "default": {}
+        }
+      ],
+      "examples": [
+        "/deploy railway",
+        "/deploy railway project:my-todo-app",
+        "/deploy railway services:[api,web]"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "admin",
+      "workflow": [
+        "Check Railway CLI is installed",
+        "Build Docker images",
+        "Push to Railway",
+        "Set environment variables",
+        "Start services",
+        "Display deployment info"
+      ],
+      "responseTemplate": "🚂 **Railway Deployment**\n\n✅ **Project**: {{project}}\n🌍 **Environment**: production\n🔧 **Services**: {{services.join(', ')}}\n\n---\n🔗 **URLs**:\n{{#each urls}}  - **{{name}}**: {{url}}\n{{/each}}\n\n---\n💰 **Cost**: {{costpermonth}}\n⏱️ **Deploy Time**: {{time}}s\n🆔 **Deployment ID**: {{id}}"
+    },
+    {
+      "name": "deploy dockerhub",
+      "description": "Build and push images to Docker Hub",
+      "skill": "docker",
+      "action": "push_to_dockerhub",
+      "arguments": [
+        {
+          "name": "username",
+          "type": "string",
+          "required": false,
+          "description": "Docker Hub username",
+          "default": "${{ env.DOCKER_HUB_USERNAME }}"
+        },
+        {
+          "name": "services",
+          "type": "array",
+          "required": false,
+          "description": "Services to push",
+          "itemType": "string",
+          "enum": ["api", "web", "all"],
+          "default": ["all"]
+        },
+        {
+          "name": "tags",
+          "type": "array",
+          "required": false,
+          "description": "Tags to apply to images",
+          "itemType": "string",
+          "default": ["latest", "${{ git.shortHash }}"]
+        }
+      ],
+      "aliases": ["/deploy push", "/docker push"],
+      "examples": [
+        "/deploy dockerhub",
+        "/deploy dockerhub username:myuser",
+        "/deploy push services:[api] tags:[v1.0.0]"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "admin",
+      "workflow": [
+        "Login to Docker Hub",
+        "Build images for specified services",
+        "Tag images",
+        "Push images to Docker Hub",
+        "Display push results"
+      ],
+      "responseTemplate": "🐳 **Docker Hub Push**\n\n{{#each images}}✅ **{{name}}**: Pushed\n   Repository: {{repository}}\n   Tags: {{tags.join(', ')}}\n   Size: {{size}}\n{{/each}}\n\n---\n📊 **Summary**:\n  Total Images: {{total}}\n  Total Size: {{totalSize}}"
+    },
+    {
+      "name": "deploy github",
+      "description": "Deploy using GitHub Actions workflows",
+      "skill": "docker",
+      "action": "deploy_via_github",
+      "arguments": [
+        {
+          "name": "workflow",
+          "type": "string",
+          "required": false,
+          "description": "GitHub Actions workflow to run",
+          "default": "deploy.yml"
+        },
+        {
+          "name": "branch",
+          "type": "string",
+          "required": false,
+          "description": "Branch to deploy from",
+          "default": "main"
+        },
+        {
+          "name": "wait",
+          "type": "boolean",
+          "required": false,
+          "description": "Wait for workflow to complete",
+          "default": true
+        }
+      ],
+      "examples": [
+        "/deploy github",
+        "/deploy github workflow:deploy-prod.yml",
+        "/deploy github branch:develop wait:false"
+      ],
+      "mcp": ["github", "process"],
+      "permission": "admin",
+      "workflow": [
+        "Trigger GitHub Actions workflow",
+        "If wait=true, monitor workflow progress",
+        "Display workflow results"
+      ],
+      "responseTemplate": "💼 **GitHub Deployment**\n\n📄 **Workflow**: {{workflow}}\n🌿 **Branch**: {{branch}}\n🔄 **Status**: {{status}}\n{{#if url}}🔗 **Workflow URL**: {{url}}{{/if}}\n\n---\n{{#if steps}}📋 **Steps**:\n{{#each steps}}  {{index}}. {{name}}: {{status}} ({{time}}s)\n{{/each}}{{/if}}\n{{#if logs}}📜 **Logs**:\n{{logs}}{{/if}}"
+    },
+    {
+      "name": "deploy local",
+      "description": "Deploy locally using Docker Compose",
+      "skill": "docker",
+      "action": "deploy_locally",
+      "arguments": [
+        {
+          "name": "build",
+          "type": "boolean",
+          "required": false,
+          "description": "Build images first",
+          "default": true
+        },
+        {
+          "name": "detach",
+          "type": "boolean",
+          "required": false,
+          "description": "Run in detached mode",
+          "default": true,
+          "aliases": ["-d"]
+        },
+        {
+          "name": "port",
+          "type": "number",
+          "required": false,
+          "description": "Port to use for web service",
+          "default": 5173
+        }
+      ],
+      "aliases": ["/deploy compose", "/docker deploy"],
+      "examples": [
+        "/deploy local",
+        "/deploy compose build:false",
+        "/deploy local port:3000"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "write",
+      "workflow": [
+        "Build images if build=true",
+        "Start services with docker compose",
+        "Verify services are running",
+        "Display access information"
+      ],
+      "responseTemplate": "🏠 **Local Deployment**\n\n✅ **Services Started**\n\n{{#each services}}🐳 **{{name}}**: Running on port {{port}}\n   Status: {{status}}\n{{/each}}\n\n---\n🌐 **Access Your Application**:\n   - API: http://localhost:8000\n   - Web: http://localhost:{{port}}\n   - API Docs: http://localhost:8000/docs\n\n💡 **Commands**:\n   - View logs: `/docker logs`\n   - Stop services: `/docker down`\n   - Check health: `/health`"
+    },
+    {
+      "name": "deploy status",
+      "description": "Check deployment status",
+      "skill": "docker",
+      "action": "check_deployment_status",
+      "arguments": [
+        {
+          "name": "platform",
+          "type": "enum",
+          "required": false,
+          "description": "Platform to check",
+          "enum": ["railway", "render", "dockerhub", "github", "local", "all"],
+          "default": "all"
+        }
+      ],
+      "aliases": ["/status", "/deployment status"],
+      "examples": [
+        "/deploy status",
+        "/status platform:railway",
+        "/deploy status platform:local"
+      ],
+      "mcp": ["process", "docker", "http"],
+      "permission": "read",
+      "workflow": [
+        "Check status for each specified platform",
+        "Aggregate results",
+        "Display status report"
+      ],
+      "responseTemplate": "📊 **Deployment Status**\n\n{{#each platforms}}=== **{{name}}** ===\nStatus: {{status}}\n{{#if urls}}URLs:\n{{#each urls}}  - {{.}}\n{{/each}}{{/if}}{{#if services}}Services:\n{{#each services}}  - {{name}}: {{status}}\n{{/each}}{{/if}}{{#if lastDeployed}}Last Deployed: {{lastDeployed}}{{/if}}\n{{/each}}"
+    },
+    {
+      "name": "deploy logs",
+      "description": "View deployment logs",
+      "skill": "docker",
+      "action": "view_deployment_logs",
+      "arguments": [
+        {
+          "name": "platform",
+          "type": "enum",
+          "required": false,
+          "description": "Platform to view logs for",
+          "enum": ["railway", "render", "dockerhub", "github", "local"],
+          "default": "local"
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false,
+          "description": "Specific service to view logs for",
+          "enum": ["api", "web", "db", "all"],
+          "default": "all"
+        },
+        {
+          "name": "tail",
+          "type": "number",
+          "required": false,
+          "description": "Number of lines to show",
+          "default": 100,
+          "min": 1,
+          "max": 10000
+        },
+        {
+          "name": "follow",
+          "type": "boolean",
+          "required": false,
+          "description": "Follow log output",
+          "default": false,
+          "aliases": ["-f"]
+        }
+      ],
+      "aliases": ["/logs", "/deployment logs"],
+      "examples": [
+        "/deploy logs",
+        "/logs platform:railway",
+        "/deploy logs service:api tail:50",
+        "/logs follow:true"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "read",
+      "workflow": [
+        "Get logs based on platform",
+        "Filter by service if specified",
+        "Format and display logs"
+      ],
+      "responseTemplate": "📜 **Deployment Logs** ({{platform}})\n\n{{#if services}}=== **{{service}}** ===\n{{/if}}{{{logs}}}\n\n---\n💡 **Tip**: Use `follow:true` to stream logs in real-time"
+    },
+    {
+      "name": "deploy rollback",
+      "description": "Rollback to a previous deployment",
+      "skill": "docker",
+      "action": "rollback_deployment",
+      "arguments": [
+        {
+          "name": "platform",
+          "type": "enum",
+          "required": false,
+          "description": "Platform to rollback",
+          "enum": ["railway", "render", "github"],
+          "default": "railway"
+        },
+        {
+          "name": "deployment",
+          "type": "string",
+          "required": false,
+          "description": "Specific deployment ID to rollback to",
+          "default": "previous"
+        },
+        {
+          "name": "force",
+          "type": "boolean",
+          "required": false,
+          "description": "Force rollback without confirmation",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/deploy rollback",
+        "/deploy rollback platform:render",
+        "/rollback deployment:abc123 force:true"
+      ],
+      "mcp": ["process", "github"],
+      "permission": "admin",
+      "confirmation": {
+        "enabled": true,
+        "message": "This will rollback {{platform}} deployment to {{deployment}}. Current deployment will be replaced. Continue?",
+        "skipIf": "force=true"
+      },
+      "workflow": [
+        "Identify target deployment",
+        "Execute rollback",
+        "Verify rollback was successful",
+        "Display rollback information"
+      ],
+      "responseTemplate": "🔙 **Rollback Successful!**\n\n📦 **Platform**: {{platform}}\n⏪ **Rolled back to**: {{deployment}}\n🆔 **New Deployment ID**: {{newId}}\n\n---\n📅 **Timeline**:\n  Current: {{current}} → Rolled back to: {{target}}\n  Duration: {{duration}}s"
+    },
+    {
+      "name": "deploy config",
+      "description": "Configure deployment settings",
+      "skill": "docker",
+      "action": "configure_deployment",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "enum",
+          "required": true,
+          "description": "Configuration action",
+          "enum": ["set", "get", "list", "remove"]
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "required": false,
+          "description": "Configuration key (for set/get/remove)",
+          "minLength": 1
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": false,
+          "description": "Configuration value (for set)"
+        },
+        {
+          "name": "platform",
+          "type": "enum",
+          "required": false,
+          "description": "Platform for configuration (for set/get/remove)",
+          "enum": ["railway", "render", "dockerhub", "github", "all"],
+          "default": "all"
+        }
+      ],
+      "aliases": ["/config deploy", "/deployment config"],
+      "examples": [
+        "/deploy config action:list",
+        "/deploy config action:get key:DATABASE_URL",
+        "/config deploy action:set key:API_PORT value:8080 platform:railway"
+      ],
+      "mcp": ["process", "docker"],
+      "permission": "admin",
+      "workflow": [
+        "Handle configuration action",
+        "Display results"
+      ],
+      "responseTemplate": "⚙️ **Deployment Configuration**\n\n{{#if action === 'list'}}**All Settings**:\n{{#each settings}}  **{{key}}**: {{value}} ({{platform}})\n{{/each}}{{/if}}{{#if action === 'get'}}**{{key}}**: {{value}}\n{{#if platform}}Platform: {{platform}}{{/if}}{{/if}}{{#if action === 'set'}}✅ **Set**: {{key}} = {{value}}\nPlatform: {{platform}}{{/if}}{{#if action === 'remove'}}✅ **Removed**: {{key}}\nPlatform: {{platform}}{{/if}}"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.bun/
+.venv/
+
+# Build outputs
+build/
+dist/
+.svelte-kit/
+
+# IDE
+.idea/
+.vscode/
+
+# Git
+.git/
+
+# Docker
+.docker/
+
+# Lock files
+bun.lock
+package-lock.json
+uv.lock
+
+# Database
+todo.db
+*.db
+
+# Certificates
+*.pem
+*.key
+*.crt
+
+# Minified files
+*.min.js
+*.min.css
+
+# Vibe commands (contain emojis in JSON)
+.vibe/commands/*.json

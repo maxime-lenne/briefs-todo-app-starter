@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# PRD-002: F2.1 - Lint + test automatique après modification
+# Voir: docs/specs/PRD/PRD-002-agentic-coding.md
+
+# Run lint-staged on staged files
+npx lint-staged

@@ -1,0 +1,218 @@
+openapi: 3.0.2
+info:
+  title: Todo API
+  description: API pour gérer les todos
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Serveur de développement
+  - url: https://api.yourdomain.com
+    description: Serveur de production
+
+paths:
+  /todos:
+    get:
+      tags: [Todos]
+      summary: Lister tous les todos
+      description: Récupère la liste complète des todos
+      responses:
+        '200':
+          description: Liste des todos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+
+    post:
+      tags: [Todos]
+      summary: Créer un nouveau todo
+      description: Ajoute un nouveau todo à la base de données
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoCreate'
+      responses:
+        '201':
+          description: Todo créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /todos/{id}:
+    get:
+      tags: [Todos]
+      summary: Récupérer un todo par ID
+      description: Retourne les détails d'un todo spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du todo
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Todo trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '404':
+          description: Todo non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+
+    put:
+      tags: [Todos]
+      summary: Mettre à jour un todo
+      description: Met à jour les champs d'un todo existant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du todo
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoUpdate'
+      responses:
+        '200':
+          description: Todo mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '404':
+          description: Todo non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+
+    delete:
+      tags: [Todos]
+      summary: Supprimer un todo
+      description: Supprime un todo de la base de données
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du todo
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Todo supprimé
+        '404':
+          description: Todo non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+
+components:
+  schemas:
+    Todo:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Identifiant unique du todo
+          example: 1
+        title:
+          type: string
+          description: Titre du todo
+          minLength: 1
+          maxLength: 200
+          example: "Acheter des courses"
+        description:
+          type: string
+          description: Description détaillée
+          nullable: true
+          maxLength: 500
+          example: "Lait, œufs, pain"
+        completed:
+          type: boolean
+          description: Statut de complétion
+          default: false
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          description: Date de création
+        updated_at:
+          type: string
+          format: date-time
+          description: Date de dernière mise à jour
+          nullable: true
+
+    TodoCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+        completed:
+          type: boolean
+          default: false
+
+    TodoUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+        completed:
+          type: boolean
+
+    Detail:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Message d'erreur détaillé
+
+    HTTPValidationError:
+      type: object
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            properties:
+              loc:
+                type: array
+                items:
+                  type: string | integer
+              msg:
+                type: string
+              type:
+                type: string

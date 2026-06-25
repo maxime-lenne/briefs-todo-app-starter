@@ -1,0 +1,405 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/spec/main/schema/command.json",
+  "category": "Testing & Quality",
+  "description": "Commands for running tests and quality checks",
+  "dependencies": ["testing", "process"],
+  "commands": [
+    {
+      "name": "test",
+      "description": "Run all tests (API + Frontend + E2E)",
+      "skill": "testing",
+      "action": "run_all_tests",
+      "arguments": [
+        {
+          "name": "services",
+          "type": "boolean",
+          "required": false,
+          "description": "Start Docker services before testing",
+          "default": true
+        },
+        {
+          "name": "coverage",
+          "type": "boolean",
+          "required": false,
+          "description": "Generate test coverage reports",
+          "default": false
+        },
+        {
+          "name": "verbose",
+          "type": "boolean",
+          "required": false,
+          "description": "Show detailed test output",
+          "default": false,
+          "aliases": ["-v"]
+        }
+      ],
+      "aliases": ["/test all", "/run tests"],
+      "examples": [
+        "/test",
+        "/test coverage:true",
+        "/test services:false",
+        "/test verbose:true"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "If services=true, start Docker with /docker up",
+        "Wait for services to be healthy",
+        "Run Python tests (pytest)",
+        "Run Frontend tests (vitest)",
+        "Run E2E tests (Playwright)",
+        "Generate coverage reports if coverage=true",
+        "Display test summary"
+      ],
+      "responseTemplate": "🧪 **Test Results**\n\n{{#each suites}}=== **{{name}}** ===\nPassed: {{passed}} ✅\nFailed: {{failed}} ❌\nSkipped: {{skipped}} ⏭️\nTime: {{time}}s\n{{/each}}\n\n---\n📊 **Summary**\n\nTotal: {{total}} tests\nPassed: {{passed}} ✅\nFailed: {{failed}} ❌\nSuccess Rate: {{successRate}}%\nTime: {{totalTime}}s\n\n{{#if failed > 0}}⚠️ **Failed Tests**:\n{{#each failures}}  - {{name}}: {{message}}\n{{/each}}{{/if}}"
+    },
+    {
+      "name": "test api",
+      "description": "Run Python API tests only",
+      "skill": "testing",
+      "action": "run_api_tests",
+      "arguments": [
+        {
+          "name": "services",
+          "type": "boolean",
+          "required": false,
+          "description": "Start Docker services before testing",
+          "default": true
+        },
+        {
+          "name": "coverage",
+          "type": "boolean",
+          "required": false,
+          "description": "Generate coverage report",
+          "default": false
+        },
+        {
+          "name": "tests",
+          "type": "array",
+          "required": false,
+          "description": "Specific test files to run",
+          "itemType": "string",
+          "default": ["tests/"]
+        },
+        {
+          "name": "markers",
+          "type": "array",
+          "required": false,
+          "description": "Run tests with specific markers",
+          "itemType": "string",
+          "default": []
+        }
+      ],
+      "aliases": ["/test python", "/test backend"],
+      "examples": [
+        "/test api",
+        "/test api coverage:true",
+        "/test api tests:[test_crud.py,test_routes.py]",
+        "/test api markers:[slow]"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "If services=true, start Docker",
+        "Run pytest with specified options",
+        "Generate coverage if coverage=true",
+        "Display results"
+      ],
+      "responseTemplate": "🐍 **Python API Tests**\n\n{{#each files}}📄 **{{name}}**: {{passed}} passed, {{failed}} failed\n{{/each}}\n\n---\n📊 **Total**: {{total}} tests\n✅ Passed: {{passed}}\n❌ Failed: {{failed}}\n⏭️ Skipped: {{skipped}}\n⏱️ Time: {{time}}s\n{{#if coverage}}\n📈 **Coverage**: {{coverage}}% ({{covered}}/{{totalLines}} lines)\n{{/if}}"
+    },
+    {
+      "name": "test frontend",
+      "description": "Run TypeScript frontend tests",
+      "skill": "testing",
+      "action": "run_frontend_tests",
+      "arguments": [
+        {
+          "name": "coverage",
+          "type": "boolean",
+          "required": false,
+          "description": "Generate coverage report",
+          "default": false
+        },
+        {
+          "name": "watch",
+          "type": "boolean",
+          "required": false,
+          "description": "Run tests in watch mode",
+          "default": false,
+          "aliases": ["-w"]
+        },
+        {
+          "name": "tests",
+          "type": "array",
+          "required": false,
+          "description": "Specific test files to run",
+          "itemType": "string",
+          "default": ["**/*.test.ts", "**/*.spec.ts"]
+        }
+      ],
+      "aliases": ["/test web", "/test ts", "/test svelte"],
+      "examples": [
+        "/test frontend",
+        "/test frontend coverage:true",
+        "/test web watch:true",
+        "/test ts tests:[api.test.ts]"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Run vitest with specified options",
+        "Generate coverage if coverage=true",
+        "Display results"
+      ],
+      "responseTemplate": "🦊 **Frontend Tests**\n\n{{#each files}}📄 **{{name}}**: {{passed}} passed, {{failed}} failed\n{{/each}}\n\n---\n📊 **Total**: {{total}} tests\n✅ Passed: {{passed}}\n❌ Failed: {{failed}}\n⏭️ Skipped: {{skipped}}\n⏱️ Time: {{time}}s\n{{#if coverage}}\n📈 **Coverage**: {{coverage}}%\n{{/if}}"
+    },
+    {
+      "name": "test e2e",
+      "description": "Run end-to-end tests with Playwright",
+      "skill": "testing",
+      "action": "run_e2e_tests",
+      "arguments": [
+        {
+          "name": "services",
+          "type": "boolean",
+          "required": false,
+          "description": "Start Docker services before testing",
+          "default": true
+        },
+        {
+          "name": "headed",
+          "type": "boolean",
+          "required": false,
+          "description": "Run tests in headed mode (show browser)",
+          "default": false
+        },
+        {
+          "name": "browser",
+          "type": "enum",
+          "required": false,
+          "description": "Browser to use for tests",
+          "enum": ["chromium", "firefox", "webkit", "all"],
+          "default": "chromium"
+        },
+        {
+          "name": "tests",
+          "type": "array",
+          "required": false,
+          "description": "Specific test files to run",
+          "itemType": "string",
+          "default": ["**/*.spec.ts", "**/*.test.ts"]
+        }
+      ],
+      "aliases": ["/test playwright", "/test browser"],
+      "examples": [
+        "/test e2e",
+        "/test e2e headed:true",
+        "/test playwright browser:all",
+        "/test e2e tests:[todo.spec.ts]"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "If services=true, start Docker",
+        "Wait for services to be ready",
+        "Run Playwright tests",
+        "Generate HTML report",
+        "Display results"
+      ],
+      "responseTemplate": "🎭 **E2E Tests ({{browser}})**\n\n{{#each tests}}📄 **{{name}}**: {{passed}} passed, {{failed}} failed\n{{/each}}\n\n---\n📊 **Total**: {{total}} tests\n✅ Passed: {{passed}}\n❌ Failed: {{failed}}\n⏭️ Skipped: {{skipped}}\n⏱️ Time: {{time}}s\n\n📁 **Report**: {{reportPath}}\n🌐 **View Report**: Open {{reportUrl}} in your browser"
+    },
+    {
+      "name": "test lint",
+      "description": "Run linting on all files",
+      "skill": "testing",
+      "action": "run_linting",
+      "arguments": [
+        {
+          "name": "fix",
+          "type": "boolean",
+          "required": false,
+          "description": "Automatically fix fixable issues",
+          "default": false
+        },
+        {
+          "name": "types",
+          "type": "array",
+          "required": false,
+          "description": "Specific linters to run",
+          "itemType": "string",
+          "enum": ["markdown", "yaml", "python", "typescript", "all"],
+          "default": ["all"]
+        }
+      ],
+      "aliases": ["/lint", "/lint all"],
+      "examples": [
+        "/test lint",
+        "/lint fix:true",
+        "/test lint types:[python,markdown]"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Run markdownlint if types includes markdown or all",
+        "Run yamllint if types includes yaml or all",
+        "Run Ruff if types includes python or all",
+        "Run ESLint/Prettier if types includes typescript or all",
+        "Display linting results"
+      ],
+      "responseTemplate": "🔍 **Linting Results**\n\n{{#each linters}}=== **{{name}}** ===\nFound: {{found}} issues\nFixed: {{fixed}} issues\n{{#if errors}}Errors:{{#each errors}}\n  - {{.}}\n{{/each}}{{/if}}{{/each}}\n\n---\n📊 **Summary**\n\nTotal Issues: {{total}}\nFixed: {{fixed}}\nRemaining: {{remaining}}\n{{#if allClean}}✅ All files are clean!{{/if}}"
+    },
+    {
+      "name": "test typecheck",
+      "description": "Run TypeScript type checking",
+      "skill": "testing",
+      "action": "run_type_check",
+      "arguments": [
+        {
+          "name": "watch",
+          "type": "boolean",
+          "required": false,
+          "description": "Run in watch mode",
+          "default": false,
+          "aliases": ["-w"]
+        }
+      ],
+      "aliases": ["/lint types", "/check types"],
+      "examples": [
+        "/test typecheck",
+        "/test typecheck watch:true",
+        "/check types"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Run svelte-check",
+        "Run tsc --noEmit",
+        "Display type checking results"
+      ],
+      "responseTemplate": "🔬 **Type Checking Results**\n\n{{#if errors}}❌ **Errors Found**:\n{{#each errors}}📄 **{{file}}:{{line}}**\n   {{message}}\n{{/each}}{{else}}✅ **All types are correct!**\n{{/if}}\n\n---\nChecked: {{filesChecked}} files\nErrors: {{errors}}\nWarnings: {{warnings}}"
+    },
+    {
+      "name": "test build",
+      "description": "Test if the project builds successfully",
+      "skill": "testing",
+      "action": "test_build",
+      "arguments": [
+        {
+          "name": "api",
+          "type": "boolean",
+          "required": false,
+          "description": "Test API build",
+          "default": true
+        },
+        {
+          "name": "web",
+          "type": "boolean",
+          "required": false,
+          "description": "Test Web build",
+          "default": true
+        }
+      ],
+      "examples": [
+        "/test build",
+        "/test build api:false",
+        "/test build web:true"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "If api=true, test API build",
+        "If web=true, test Web build",
+        "Display build results"
+      ],
+      "responseTemplate": "🏗️ **Build Test Results**\n\n{{#if api}}=== **API Build** ===\nStatus: {{apiStatus}}\nTime: {{apiTime}}s\n{{#if apiSize}}Size: {{apiSize}}{{/if}}\n{{/if}}{{#if web}}=== **Web Build** ===\nStatus: {{webStatus}}\nTime: {{webTime}}s\n{{#if webSize}}Size: {{webSize}}{{/if}}\n{{/if}}\n\n---\n📊 **Overall**: {{overallStatus}}"
+    },
+    {
+      "name": "test security",
+      "description": "Run security scans on the project",
+      "skill": "security",
+      "action": "run_security_scan",
+      "arguments": [
+        {
+          "name": "trivy",
+          "type": "boolean",
+          "required": false,
+          "description": "Run Trivy vulnerability scan",
+          "default": true
+        },
+        {
+          "name": "gitleaks",
+          "type": "boolean",
+          "required": false,
+          "description": "Run Gitleaks secrets scan",
+          "default": true
+        },
+        {
+          "name": "severity",
+          "type": "enum",
+          "required": false,
+          "description": "Minimum severity level to report",
+          "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "ALL"],
+          "default": "HIGH"
+        }
+      ],
+      "aliases": ["/scan", "/security scan"],
+      "examples": [
+        "/test security",
+        "/scan trivy:false",
+        "/security scan severity:CRITICAL"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Run Trivy scan if trivy=true",
+        "Run Gitleaks scan if gitleaks=true",
+        "Aggregate and display results"
+      ],
+      "responseTemplate": "🔒 **Security Scan Results**\n\n{{#if trivy}}=== **Trivy Scan** ===\nVulnerabilities Found: {{trivy.found}}\nBy Severity:\n  CRITICAL: {{trivy.critical}}\n  HIGH: {{trivy.high}}\n  MEDIUM: {{trivy.medium}}\n  LOW: {{trivy.low}}\n{{#if trivy.fixed}}Fixed: {{trivy.fixed}}{{/if}}\n{{/if}}{{#if gitleaks}}=== **Gitleaks Scan** ===\nSecrets Found: {{gitleaks.found}}\n{{#if gitleaks.details}}Details:\n  {{gitleaks.details}}{{/if}}{{/if}}\n\n---\n📊 **Overall**: {{#if vulnerabilities > 0}}⚠️ {{vulnerabilities}} issues found{{else}}✅ No critical issues{{/if}}"
+    },
+    {
+      "name": "test coverage",
+      "description": "Generate and display test coverage reports",
+      "skill": "testing",
+      "action": "generate_coverage",
+      "arguments": [
+        {
+          "name": "api",
+          "type": "boolean",
+          "required": false,
+          "description": "Generate API coverage",
+          "default": true
+        },
+        {
+          "name": "web",
+          "type": "boolean",
+          "required": false,
+          "description": "Generate frontend coverage",
+          "default": true
+        },
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": false,
+          "description": "Open coverage report in browser",
+          "default": false
+        }
+      ],
+      "aliases": ["/coverage"],
+      "examples": [
+        "/test coverage",
+        "/coverage api:false",
+        "/test coverage open:true"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Generate API coverage if api=true",
+        "Generate frontend coverage if web=true",
+        "Display coverage summary",
+        "Open report if open=true"
+      ],
+      "responseTemplate": "📊 **Test Coverage Report**\n\n{{#if api}}=== **API Coverage** ===\nLines: {{api.lines.total}}\nCovered: {{api.lines.covered}} ({{api.percentage}}%)\nFunctions: {{api.functions.covered}}/{{api.functions.total}} ({{api.functions.percentage}}%)\nBranches: {{api.branches.covered}}/{{api.branches.total}} ({{api.branches.percentage}}%)\n{{/if}}{{#if web}}=== **Frontend Coverage** ===\nLines: {{web.lines.total}}\nCovered: {{web.lines.covered}} ({{web.percentage}}%)\nFunctions: {{web.functions.covered}}/{{web.functions.total}} ({{web.functions.percentage}}%)\n{{/if}}\n\n---\n🎯 **Overall Coverage**: {{overallPercentage}}%\n\n📁 **Reports**:\n  API: {{apiReportPath}}\n  Web: {{webReportPath}}\n{{#if open}}🌐 **Opening reports in browser...**{{/if}}"
+    }
+  ]
+}

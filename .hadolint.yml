@@ -1,0 +1,26 @@
+# Hadolint configuration for Dockerfiles
+# See: https://github.com/hadolint/hadolint
+
+failure-threshold: warning
+
+# Ignore specific rules for this project
+ignored:
+  # DL3003: Use WORKDIR to switch to a non-root user
+  - DL3003
+  
+  # DL3006: Always set the SHELL instruction before RUN
+  - DL3006
+
+# Trusted base images (overrides default)
+trustedRegistries:
+  - docker.io
+  - ghcr.io
+  - registry.access.redhat.com
+  - python
+  - node
+
+# Custom labels to check
+require-label:
+  - maintainer
+  - description
+  - version

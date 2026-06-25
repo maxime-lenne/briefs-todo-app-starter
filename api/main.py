@@ -6,13 +6,16 @@ from sqlalchemy.orm import Session
 import crud
 import schemas
 from database import Base, engine, get_db
+from models import Todo
+from dependency import TaskDependency
 
 # Create all tables on startup
+# PRD-003: F1.1, F2.1 - Inclure les nouveaux modèles
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="To-Do API",
-    description="REST API for managing to-do tasks",
+    description="REST API for managing to-do tasks with subtasks and dependencies",
     version="0.1.0",
 )
 
@@ -52,3 +55,41 @@ def delete_todo(todo_id: int, db: Session = Depends(get_db)):
     """Delete a todo."""
     if not crud.delete_todo(db, todo_id):
         raise HTTPException(status_code=404, detail="Todo not found")
+
+
+# PRD-003: F1.2 - Endpoint pour lister les sous-tâches
+@app.get("/todos/{todo_id}/subtasks", response_model=list[schemas.TodoResponse])
+def get_subtasks(todo_id: int, db: Session = Depends(get_db)):
+    """Get all subtasks of a todo."""
+    subtasks = crud.get_subtasks(db, todo_id)
+    return subtasks
+
+
+# PRD-003: F2.3 - Endpoints pour gérer les dépendances
+@app.get("/todos/{todo_id}/dependencies", response_model=list[schemas.TaskDependencyResponse])
+def get_dependencies(todo_id: int, db: Session = Depends(get_db)):
+    """Get all dependencies for a todo (blocking and blocked)."""
+    dependencies = crud.get_dependencies(db, todo_id)
+    return dependencies
+
+
+@app.post("/todos/{todo_id}/dependencies", response_model=schemas.TaskDependencyResponse, status_code=201)
+def create_dependency(
+    todo_id: int,
+    dependency: schemas.TaskDependencyCreate,
+    db: Session = Depends(get_db)
+):
+    """Create a dependency where todo_id is the blocking task."""
+    # Ensure the blocking_id is the current todo_id
+    dependency.blocking_id = todo_id
+    try:
+        return crud.create_dependency(db, dependency)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/dependencies/{dependency_id}", status_code=204)
+def delete_dependency(dependency_id: int, db: Session = Depends(get_db)):
+    """Delete a dependency."""
+    if not crud.delete_dependency(db, dependency_id):
+        raise HTTPException(status_code=404, detail="Dependency not found")

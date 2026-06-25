@@ -1,0 +1,364 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/spec/main/schema/command.json",
+  "category": "Code Quality",
+  "description": "Commands for code linting, formatting, and quality checks",
+  "dependencies": ["todo-app"],
+  "commands": [
+    {
+      "name": "lint",
+      "description": "Run all linters (markdown, YAML, Python, TypeScript)",
+      "skill": "todo-app",
+      "action": "run_all_linters",
+      "arguments": [
+        {
+          "name": "fix",
+          "type": "boolean",
+          "required": false,
+          "description": "Automatically fix fixable issues",
+          "default": false
+        },
+        {
+          "name": "verbose",
+          "type": "boolean",
+          "required": false,
+          "description": "Show detailed output",
+          "default": false,
+          "aliases": ["-v"]
+        }
+      ],
+      "aliases": ["/lint all"],
+      "examples": [
+        "/lint",
+        "/lint fix:true",
+        "/lint verbose:true"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Run markdownlint with bun run lint:md",
+        "Run yamllint with bun run lint:yaml",
+        "Run Ruff for Python files",
+        "Run ESLint/Prettier for TypeScript/Svelte files",
+        "Aggregate and display results"
+      ],
+      "responseTemplate": "🔍 **Linting Results**\n\n{{#each linters}}=== **{{name}}** ===\nStatus: {{status}}\nIssues: {{issues}}\nFixed: {{fixed}}\n{{#if errors}}Errors:\n{{#each errors}}  Line {{line}}, Col {{col}}: {{message}}\n{{/each}}{{/if}}{{/each}}\n\n---\n📊 **Summary**\n\nTotal Issues: {{total}}\nFixed: {{fixed}}\nRemaining: {{remaining}}\n{{#if allClean}}✅ **All files pass linting!**{{/if}}"
+    },
+    {
+      "name": "lint md",
+      "description": "Run markdownlint on markdown files",
+      "skill": "todo-app",
+      "action": "run_markdownlint",
+      "arguments": [
+        {
+          "name": "fix",
+          "type": "boolean",
+          "required": false,
+          "description": "Automatically fix issues",
+          "default": false
+        },
+        {
+          "name": "files",
+          "type": "array",
+          "required": false,
+          "description": "Specific files to lint",
+          "itemType": "string",
+          "default": ["**/*.md"]
+        }
+      ],
+      "aliases": ["/lint markdown", "/markdown lint"],
+      "examples": [
+        "/lint md",
+        "/lint md fix:true",
+        "/lint markdown files:[docs/AGENTS.md]"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Run markdownlint with specified options",
+        "Display results with suggestions"
+      ],
+      "responseTemplate": "📝 **Markdown Linting**\n\n{{#each files}}📄 **{{file}}**:\n{{#each issues}}  Line {{line}}, Col {{col}}: {{rule}} - {{message}}\n{{/each}}{{/each}}\n\n---\n📊 **Summary**:\n  Files checked: {{filesChecked}}\n  Issues found: {{issues}}\n  Fixed: {{fixed}}\n{{#if allClean}}✅ All markdown files are clean!{{/if}}"
+    },
+    {
+      "name": "lint yaml",
+      "description": "Run yamllint on YAML files",
+      "skill": "todo-app",
+      "action": "run_yamllint",
+      "arguments": [
+        {
+          "name": "files",
+          "type": "array",
+          "required": false,
+          "description": "Specific files to lint",
+          "itemType": "string",
+          "default": ["**/*.yml", "**/*.yaml", ".github/**/*.yml"]
+        }
+      ],
+      "aliases": ["/lint yml"],
+      "examples": [
+        "/lint yaml",
+        "/lint yaml files:[docker-compose.yml]",
+        "/lint yml files:[.github/workflows/*.yml]"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Run yamllint on specified files",
+        "Display YAML formatting issues"
+      ],
+      "responseTemplate": "📋 **YAML Linting**\n\n{{#each files}}📄 **{{file}}**:\n{{#each issues}}  Line {{line}}, Col {{col}}: {{rule}} - {{message}}\n{{/each}}{{/each}}\n\n---\n📊 **Summary**:\n  Files checked: {{filesChecked}}\n  Issues found: {{issues}}\n{{#if allClean}}✅ All YAML files are clean!{{/if}}"
+    },
+    {
+      "name": "lint py",
+      "description": "Run Ruff linter on Python files",
+      "skill": "todo-app",
+      "action": "run_ruff",
+      "arguments": [
+        {
+          "name": "fix",
+          "type": "boolean",
+          "required": false,
+          "description": "Automatically fix issues",
+          "default": false
+        },
+        {
+          "name": "files",
+          "type": "array",
+          "required": false,
+          "description": "Specific files to lint",
+          "itemType": "string",
+          "default": ["api/"]
+        },
+        {
+          "name": "check",
+          "type": "boolean",
+          "required": false,
+          "description": "Run in check mode (no output)",
+          "default": false
+        }
+      ],
+      "aliases": ["/lint python", "/ruff"],
+      "examples": [
+        "/lint py",
+        "/lint python fix:true",
+        "/ruff files:[api/main.py,api/crud.py]"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Run Ruff with specified options",
+        "Display Python code quality issues"
+      ],
+      "responseTemplate": "🐍 **Python Linting (Ruff)**\n\n{{#each files}}📄 **{{file}}**:\n{{#each issues}}  Line {{line}}, Col {{col}}: {{code}} - {{message}}\n    Fix: {{fix}}\n{{/each}}{{/each}}\n\n---\n📊 **Summary**:\n  Files checked: {{filesChecked}}\n  Issues found: {{issues}}\n  Fixed: {{fixed}}\n  {{#each byCode}}{{code}}: {{count}}\n  {{/each}}{{#if allClean}}✅ All Python files are clean!{{/if}}"
+    },
+    {
+      "name": "lint ts",
+      "description": "Run ESLint and Prettier on TypeScript/Svelte files",
+      "skill": "todo-app",
+      "action": "run_typescript_lint",
+      "arguments": [
+        {
+          "name": "fix",
+          "type": "boolean",
+          "required": false,
+          "description": "Automatically fix issues",
+          "default": false
+        },
+        {
+          "name": "files",
+          "type": "array",
+          "required": false,
+          "description": "Specific files to lint",
+          "itemType": "string",
+          "default": ["web/"]
+        },
+        {
+          "name": "check",
+          "type": "boolean",
+          "required": false,
+          "description": "Run in check mode",
+          "default": false
+        }
+      ],
+      "aliases": ["/lint typescript", "/lint svelte", "/eslint"],
+      "examples": [
+        "/lint ts",
+        "/lint typescript fix:true",
+        "/eslint files:[web/src/lib/api.ts]"
+      ],
+      "mcp": ["process"],
+      "permission": "read",
+      "workflow": [
+        "Run ESLint with specified options",
+        "Run Prettier if configured",
+        "Display TypeScript/Svelte issues"
+      ],
+      "responseTemplate": "🦊 **TypeScript/Svelte Linting**\n\n{{#each files}}📄 **{{file}}**:\n{{#each issues}}  Line {{line}}, Col {{col}}: {{rule}} - {{message}}\n{{/each}}{{/each}}\n\n---\n📊 **Summary**:\n  Files checked: {{filesChecked}}\n  Issues found: {{issues}}\n  Fixed: {{fixed}}\n{{#if allClean}}✅ All TypeScript/Svelte files are clean!{{/if}}"
+    },
+    {
+      "name": "format",
+      "description": "Format all files (markdown, YAML, Python, TypeScript)",
+      "skill": "todo-app",
+      "action": "format_all_files",
+      "arguments": [
+        {
+          "name": "check",
+          "type": "boolean",
+          "required": false,
+          "description": "Check formatting without applying changes",
+          "default": false
+        },
+        {
+          "name": "types",
+          "type": "array",
+          "required": false,
+          "description": "Specific file types to format",
+          "itemType": "string",
+          "enum": ["markdown", "yaml", "python", "typescript", "all"],
+          "default": ["all"]
+        }
+      ],
+      "examples": [
+        "/format",
+        "/format check:true",
+        "/format types:[python,typescript]"
+      ],
+      "mcp": ["process"],
+      "permission": "write",
+      "workflow": [
+        "Format markdown files if types includes markdown or all",
+        "Format YAML files if types includes yaml or all",
+        "Format Python files with Ruff if types includes python or all",
+        "Format TypeScript/Svelte files if types includes typescript or all",
+        "Display formatting results"
+      ],
+      "responseTemplate": "💅 **Formatting Complete!**\n\n{{#each formatters}}=== **{{name}}** ===\nFiles formatted: {{formatted}}\nFiles unchanged: {{unchanged}}\nFiles with errors: {{errors}}\n{{/each}}\n\n---\n📊 **Summary**:\n  Total files: {{total}}\n  Formatted: {{formatted}}\n  Unchanged: {{unchanged}}\n{{#if check}}✅ **Check mode**: No changes applied{{/if}}"
+    },
+    {
+      "name": "format md",
+      "description": "Format markdown files",
+      "skill": "todo-app",
+      "action": "format_markdown",
+      "arguments": [
+        {
+          "name": "files",
+          "type": "array",
+          "required": false,
+          "description": "Specific files to format",
+          "itemType": "string",
+          "default": ["**/*.md"]
+        },
+        {
+          "name": "check",
+          "type": "boolean",
+          "required": false,
+          "description": "Check formatting without applying",
+          "default": false
+        }
+      ],
+      "examples": [
+        "/format md",
+        "/format md check:true",
+        "/format md files:[docs/AGENTS.md]"
+      ],
+      "mcp": ["process"],
+      "permission": "write",
+      "workflow": [
+        "Run markdownlint with --fix",
+        "Display formatting results"
+      ],
+      "responseTemplate": "📝 **Markdown Formatting**\n\n{{#each files}}📄 **{{file}}**: {{status}}\n{{/each}}\n\n---\n📊 **Summary**:\n  Files processed: {{total}}\n  Formatted: {{formatted}}\n  Unchanged: {{unchanged}}"
+    },
+    {
+      "name": "format py",
+      "description": "Format Python files with Ruff",
+      "skill": "todo-app",
+      "action": "format_python",
+      "arguments": [
+        {
+          "name": "files",
+          "type": "array",
+          "required": false,
+          "description": "Specific files to format",
+          "itemType": "string",
+          "default": ["api/"]
+        },
+        {
+          "name": "check",
+          "type": "boolean",
+          "required": false,
+          "description": "Check formatting without applying",
+          "default": false
+        }
+      ],
+      "aliases": ["/format python", "/ruff format"],
+      "examples": [
+        "/format py",
+        "/format python check:true",
+        "/ruff format files:[api/main.py]"
+      ],
+      "mcp": ["process"],
+      "permission": "write",
+      "workflow": [
+        "Run Ruff format with --check if check=true",
+        "Display formatting results"
+      ],
+      "responseTemplate": "🐍 **Python Formatting**\n\n{{#each files}}📄 **{{file}}**: {{status}}\n{{/each}}\n\n---\n📊 **Summary**:\n  Files processed: {{total}}\n  Formatted: {{formatted}}\n  Unchanged: {{unchanged}}\n  Would be formatted: {{wouldFormat}}"
+    },
+    {
+      "name": "format ts",
+      "description": "Format TypeScript/Svelte files with Prettier",
+      "skill": "todo-app",
+      "action": "format_typescript",
+      "arguments": [
+        {
+          "name": "files",
+          "type": "array",
+          "required": false,
+          "description": "Specific files to format",
+          "itemType": "string",
+          "default": ["web/"]
+        },
+        {
+          "name": "check",
+          "type": "boolean",
+          "required": false,
+          "description": "Check formatting without applying",
+          "default": false
+        }
+      ],
+      "aliases": ["/format typescript", "/format svelte", "/prettier"],
+      "examples": [
+        "/format ts",
+        "/format typescript check:true",
+        "/prettier files:[web/src/lib/api.ts]"
+      ],
+      "mcp": ["process"],
+      "permission": "write",
+      "workflow": [
+        "Run Prettier with --check if check=true",
+        "Display formatting results"
+      ],
+      "responseTemplate": "🦊 **TypeScript/Svelte Formatting**\n\n{{#each files}}📄 **{{file}}**: {{status}}\n{{/each}}\n\n---\n📊 **Summary**:\n  Files processed: {{total}}\n  Formatted: {{formatted}}\n  Unchanged: {{unchanged}}\n{{#if check}}✅ **Check mode**: No changes applied{{/if}}"
+    },
+    {
+      "name": "lint fix",
+      "description": "Automatically fix all fixable linting issues",
+      "skill": "todo-app",
+      "action": "fix_all_linting",
+      "arguments": [],
+      "examples": [
+        "/lint fix"
+      ],
+      "mcp": ["process"],
+      "permission": "write",
+      "workflow": [
+        "Run markdownlint --fix",
+        "Run Ruff format",
+        "Run Prettier --write",
+        "Display fix results"
+      ],
+      "responseTemplate": "🔧 **Auto-Fix Applied!**\n\n{{#each fixers}}=== **{{name}}** ===\nFiles fixed: {{fixed}}\nFiles unchanged: {{unchanged}}\n{{/each}}\n\n---\n📊 **Summary**:\n  Total files: {{total}}\n  Fixed: {{fixed}}\n  Unchanged: {{unchanged}}"
+    }
+  ]
+}
