@@ -35,3 +35,6 @@ todo.db
 # Minified files
 *.min.js
 *.min.css
+
+# Vibe commands (contain emojis in JSON)
+.vibe/commands/*.json

@@ -273,7 +273,7 @@
       ],
       "examples": [
         "/docker exec api bash",
-        "/docker exec api "python -c 'print(2+2)'"",
+        '/docker exec api "python -c \'print(2+2)\'",',
         "/docker exec web sh"
       ],
       "mcp": ["docker", "process"],

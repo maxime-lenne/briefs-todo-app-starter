@@ -333,7 +333,7 @@
       ],
       "examples": [
         "/echo Hello World!",
-        "/echo "Test message" repeat:3"
+        '/echo "Test message" repeat:3'
       ],
       "permission": "read",
       "workflow": [

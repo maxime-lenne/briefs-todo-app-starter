@@ -34,8 +34,8 @@
       ],
       "examples": [
         "/todo add Buy groceries",
-        "/todo add \"Fix API bug\" \"Investigate the database connection issue\"",
-        "/todo add \"Write tests\" true"
+        '/todo add "Fix API bug" "Investigate the database connection issue"',
+        '/todo add "Write tests" true'
       ],
       "mcp": ["process", "http"],
       "permission": "write",
@@ -45,7 +45,7 @@
         "Display created todo with ID",
         "Suggest next actions"
       ],
-      "responseTemplate": "Todo created successfully!\n\n**ID**: {{id}}\n**Title**: {{title}}\n**Description**: {{description || '(none)'}}\n**Status**: {{completed ? 'Completed' : 'Active'}}\n\nWould you like to add another todo or view the list?"
+      "responseTemplate": "✅ Todo created successfully!\n\n**ID**: {{id}}\n**Title**: {{title}}\n**Description**: {{description || '(none)'}}\n**Status**: {{completed ? '✅ Completed' : '⏳ Active'}}\n\nWould you like to add another todo or view the list?"
     },
     {
       "name": "todo list",
@@ -79,7 +79,7 @@
         "Filter by status if specified",
         "Format and display results with statistics"
       ],
-      "responseTemplate": "Todo List ({{filter === 'all' ? 'All' : filter === 'active' ? 'Active' : 'Completed'}})\n\n{{#each todos}}{{completed ? '[x]' : '[ ]'}} **{{id}}. {{title}}**{{#if description}}\n   *{{description}}*{{/if}}\n{{/each}}\n\n---\nStats: {{total}} total - {{active}} active - {{completed}} completed\n\n*Showing {{displayed}} of {{total}} items*"
+      "responseTemplate": "📋 **Todo List** ({{filter === 'all' ? 'All' : filter === 'active' ? 'Active' : 'Completed'}})\n\n{{#each todos}}{{completed ? '✅' : '⬜'}} **{{id}}. {{title}}**{{#if description}}\n   *{{description}}*{{/if}}\n{{/each}}\n\n---\n📊 **Stats**: {{total}} total • {{active}} active • {{completed}} completed\n\n*Showing {{displayed}} of {{total}} items*"
     },
     {
       "name": "todo show",
@@ -104,7 +104,7 @@
         "Display detailed todo information",
         "Show related actions"
       ],
-      "responseTemplate": "**Todo #{{id}}**\n\n**Title**: {{title}}\n**Description**: {{description || '(none)'}}\n**Status**: {{completed ? 'Completed' : 'Active'}}\n**Created**: {{created_at}}\n**Updated**: {{updated_at || 'Never'}}\n\n---\n**Actions**: `/todo toggle {{id}}` - `/todo edit {{id}}` - `/todo delete {{id}}`"
+      "responseTemplate": "📝 **Todo #{{id}}**\n\n**Title**: {{title}}\n**Description**: {{description || '(none)'}}\n**Status**: {{completed ? '✅ Completed' : '⏳ Active'}}\n**Created**: {{created_at}}\n**Updated**: {{updated_at || 'Never'}}\n\n---\n🔧 **Actions**: `/todo toggle {{id}}` • `/todo edit {{id}}` • `/todo delete {{id}}`"
     },
     {
       "name": "todo toggle",
@@ -128,7 +128,7 @@
         "Toggle completed status",
         "Confirm update"
       ],
-      "responseTemplate": "**Todo #{{id}}** {{newStatus ? 'marked as completed' : 'marked as active'}}\n\n**Title**: {{title}}\n**Previous Status**: {{oldStatus ? 'Completed' : 'Active'}}\n**New Status**: {{newStatus ? 'Completed' : 'Active'}}"
+      "responseTemplate": "✅ **Todo #{{id}}** {{newStatus ? 'marked as completed' : 'marked as active'}}\n\n**Title**: {{title}}\n**Previous Status**: {{oldStatus ? '✅ Completed' : '⏳ Active'}}\n**New Status**: {{newStatus ? '✅ Completed' : '⏳ Active'}}"
     },
     {
       "name": "todo edit",
@@ -177,7 +177,7 @@
         "Send PUT request to /api/todos/{id}",
         "Display updated todo information"
       ],
-      "responseTemplate": "**Todo #{{id}}** updated successfully!\n\n{{#if title}}**Title**: {{title}}{{/if}}{{#if description}}\n**Description**: {{description}}{{/if}}{{#if completed}}\n**Status**: {{completed ? 'Completed' : 'Active'}}{{/if}}"
+      "responseTemplate": "✏️ **Todo #{{id}}** updated successfully!\n\n{{#if title}}**Title**: {{title}}{{/if}}{{#if description}}\n**Description**: {{description}}{{/if}}{{#if completed}}\n**Status**: {{completed ? '✅ Completed' : '⏳ Active'}}{{/if}}"
     },
     {
       "name": "todo delete",
@@ -214,7 +214,7 @@
         "Send DELETE request to /api/todos/{id}",
         "Confirm deletion"
       ],
-      "responseTemplate": "**Todo #{{id}}** deleted successfully!\n\n**Title**: {{title}}"
+      "responseTemplate": "🗑️ **Todo #{{id}}** deleted successfully!\n\n**Title**: {{title}}"
     },
     {
       "name": "todo search",
@@ -238,7 +238,7 @@
           "default": "all"
         }
       ],
-      "examples": ["/todo search bug", "/todo search \"API\" active", "/todo search fix"],
+      "examples": ["/todo search bug", '/todo search "API" active', "/todo search fix"],
       "mcp": ["http"],
       "permission": "read",
       "workflow": [
@@ -247,7 +247,7 @@
         "Filter by status if specified",
         "Display matching results"
       ],
-      "responseTemplate": "**Search Results for '{{query}}'** ({{filter}})\n\n{{#if results}}{{#each results}}{{completed ? '[x]' : '[ ]'}} **{{id}}. {{title}}**{{#if description}}\n   *{{description}}*{{/if}}\n{{/each}}{{else}}No todos found matching '{{query}}'{{/if}}\n\n---\nFound {{count}} {{count === 1 ? 'result' : 'results'}}"
+      "responseTemplate": "🔍 **Search Results for \"{{query}}\"** ({{filter}})\n\n{{#if results}}{{#each results}}{{completed ? '✅' : '⬜'}} **{{id}}. {{title}}**{{#if description}}\n   *{{description}}*{{/if}}\n{{/each}}{{else}}No todos found matching \"{{query}}\"{{/if}}\n\n---\nFound {{count}} {{count === 1 ? 'result' : 'results'}}"
     },
     {
       "name": "todo clear",
@@ -268,7 +268,7 @@
       "permission": "admin",
       "confirmation": {
         "enabled": true,
-        "message": "DANGER: This will delete ALL todos permanently! Type 'DELETE ALL' to confirm:",
+        "message": "⚠️ DANGER: This will delete ALL todos permanently! Type 'DELETE ALL' to confirm:",
         "requireInput": true,
         "expectedInput": "DELETE ALL"
       },
@@ -277,7 +277,7 @@
         "Send DELETE requests for all todos",
         "Confirm all deleted"
       ],
-      "responseTemplate": "**All todos deleted!**\n\n{{count}} todos were permanently removed from the database."
+      "responseTemplate": "💥 **All todos deleted!**\n\n{{count}} todos were permanently removed from the database."
     },
     {
       "name": "todo stats",
@@ -293,7 +293,7 @@
         "Calculate statistics",
         "Display formatted results"
       ],
-      "responseTemplate": "**Todo Statistics**\n\n**Total**: {{total}}\n**Completed**: {{completed}} ({{percentCompleted}}%)\n**Active**: {{active}} ({{percentActive}}%)\n\n**Progress**: {{percentCompleted}}% complete\n\n{{#if averageAge}}**Average Age**: {{averageAge}} days{{/if}}"
+      "responseTemplate": "📊 **Todo Statistics**\n\n📝 **Total**: {{total}}\n✅ **Completed**: {{completed}} ({{percentCompleted}}%)\n⏳ **Active**: {{active}} ({{percentActive}}%)\n\n📈 **Progress**: {{percentCompleted}}% complete\n\n{{#if averageAge}}⏱️ **Average Age**: {{averageAge}} days{{/if}}"
     }
   ]
 }
