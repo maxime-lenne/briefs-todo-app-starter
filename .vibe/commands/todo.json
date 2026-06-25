@@ -1,3 +1,5 @@
+// PRD-002: F1.1, F1.2, F1.3 - Commandes Agent Todo
+// Voir: docs/specs/PRD/PRD-002-agentic-coding.md
 {
   "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/spec/main/schema/command.json",
   "category": "Todo Management",

@@ -1,3 +1,5 @@
+# PRD-001: Environnement de Développement Docker
+# Voir: docs/specs/PRD/PRD-001-docker.md
 services:
   db:
     image: postgres:16-alpine
@@ -22,6 +24,7 @@ services:
       retries: 5
 
   api:
+    # PRD-001: F1.2 - Accès API sur http://localhost:8000
     build:
       context: ./api
     environment:
@@ -42,6 +45,7 @@ services:
           memory: 256M
 
   web:
+    # PRD-001: F1.3 - Accès frontend sur http://localhost:8080
     build:
       context: ./web
     ports:
